@@ -38,14 +38,8 @@ CELLTYPES = ["B_Mem","B_Naive","CD4_Mem","CD4_Naive","CD8_Mem","CD8_Naive","cDC"
 
 rule all:    
     input:
-        "data/analysis_out/time_DE/lspline_dream_v2/cluster_genes/enrichment_clusters_k5_distance.rds",
-        expand("data/analysis_out/variancePartition/age_sliding_window_bootstrap/gls_model_v3_include_nsubj/fgsea/slope_{celltype}.tsv", celltype=CELLTYPES),
-        ####
-        expand("data/analysis_out/variancePartition/age_sliding_window_bootstrap/gls_model_v3_include_nsubj/bootstrap_summary_dat_list_{celltype}.rds", celltype=CELLTYPES),
-        expand("data/analysis_out/variancePartition/age_sliding_window_bootstrap_regress_cells/gls_model_v3_include_nsubj/bootstrap_summary_dat_list_{celltype}.rds", celltype=CELLTYPES),
-        expand("data/analysis_out/variancePartition/age_sliding_window_bootstrap/gls_model_v3_include_nsubj/fgsea/slope_{celltype}.tsv", celltype=CELLTYPES),
-        expand("data/analysis_out/variancePartition/age_sliding_window_bootstrap_regress_cells/gls_model_v3_include_nsubj/fgsea/slope_{celltype}.tsv", celltype=CELLTYPES)
-
+        expand("data/analysis_out/variancePartition/age_sliding_window_bootstrap_regress_cells/gls_model_v3_include_nsubj/fgsea/slope_{celltype}.tsv", celltype=CELLTYPES),
+        expand("data/analysis_out/variancePartition/age_sliding_window_bootstrap_regress_cells/gls_model_v3_include_nsubj/bootstrap_summary_dat_list_{celltype}.rds", celltype=CELLTYPES)
 
 ## processsing -------------------------------------------------------
 
