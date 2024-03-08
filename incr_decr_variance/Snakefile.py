@@ -33,6 +33,9 @@ singularity: "file:///gpfs/gibbs/pi/csei/users/lb2336/incr_decr_svariance/singul
 #Rscript processing/metadata/compile_metadata_pilot.R
 #Rscript processing/metadata/combine_pilot_full_add_clinical.R
 
+CELLTYPES = ["B_Mem","B_Naive","CD4_Mem","CD4_Naive","CD8_Mem","CD8_Naive","cDC","gdT_Vd1","gdT_Vd2","MAIT","Mono_Classical","Mono_NonClassical","NK_CD16hi","NK_CD56hi","pDC"]
+
+
 rule all:    
     input:
         "data/analysis_out/time_DE/lspline_dream_v2/cluster_genes/enrichment_clusters_k5_distance.rds",
@@ -50,7 +53,6 @@ rule all:
 
 WINDOWS = []
 AGE_GROUPS = [1,2,3]
-CELLTYPES = ["B_Mem","B_Naive","CD4_Mem","CD4_Naive","CD8_Mem","CD8_Naive","cDC","gdT_Vd1","gdT_Vd2","MAIT","Mono_Classical","Mono_NonClassical","NK_CD16hi","NK_CD56hi","pDC"]
 
 for i in range(1,13):
     WINDOWS.append(str(i) + "to" + str(i + 3))
