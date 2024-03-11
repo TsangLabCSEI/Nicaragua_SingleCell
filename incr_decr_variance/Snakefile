@@ -15,7 +15,7 @@ rule all:
 WINDOWS = []
 AGE_GROUPS = [1,2,3]
 
-for i in range(1,13):
+for i in range(1,12):
     WINDOWS.append(str(i) + "to" + str(i + 3))
 
 BOOT_ITER = range(0,100)
@@ -30,7 +30,7 @@ rule make_window_subsets_rm_cells:
 
 rule run_varpart_window_jacknife:
     input:
-        expand("data/analysis_out/variancePartition/sliding_age_window/subsetted_vst_ctrl_cells_{celltype}/age_{window}_vst.rds", window = WINDOWS, celltype=CELLTYPES)
+        expand("data/analysis_out/variancePartition/sliding_age_window/subsetted_vst_ctrl_cells_{celltype}/age_{window}_vst.rds", window = WINDOWS, boot=BOOT_ITER, celltype=CELLTYPES)
     output:
         "data/analysis_out/variancePartition/age_sliding_window_bootstrap/varpart_objects/window_{window}_{celltype}_{boot}_varpart.rds",
         "data/analysis_out/variancePartition/age_sliding_window_bootstrap/metadata_subsets/window_{window}_{celltype}_{boot}_meta.tsv",
@@ -41,20 +41,6 @@ rule run_varpart_window_jacknife:
         boot = lambda wildcards: wildcards.boot
     script:
         "scripts/run_varpart_snakemake.R"
-
-rule run_varpart_age_group_jacknife_regress_cells:
-    input:
-        expand("data/analysis_out/variancePartition/age_group_regress_cells/subsetted_vst_regress_cells_{celltype}/age_{window}_vst.rds", window=WINDOWS, boot=BOOT_ITER, celltype=CELLTYPES)
-    output:
-        "data/analysis_out/variancePartition/age_group_bootstrap_regress_cells/varpart_objects/window_{window}_{celltype}_{boot}_varpart.rds",
-        "data/analysis_out/variancePartition/age_group_bootstrap_regress_cells/metadata_subsets/window_{window}_{celltype}_{boot}_meta.tsv",
-        "data/analysis_out/variancePartition/age_group_bootstrap_regress_cells/subject_boots/window_{window}_{celltype}_{boot}_subjects.txt"
-    params:
-        celltype = lambda wildcards: wildcards.celltype,
-        window = lambda wildcards: wildcards.window,
-        boot = lambda wildcards: wildcards.boot
-    script:
-        "scripts/run_varpart_snakemake_regress_cells.R"
 
 rule metafor_metaanalysis_v3_regress_cells:
     input:
