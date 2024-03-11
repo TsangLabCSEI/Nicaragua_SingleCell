@@ -13,16 +13,12 @@ dir.create(OUT_DIR, recursive = TRUE)
 
 vst <- readRDS(vst_IN_PATH)
 
-vst <- vst[, vst$Sample.type == "case"]
+#vst <- vst[, vst$Sample.type == "case"]
 meta <- as.data.frame(colData(vst))
 
-min_age_mo <- min(meta$Age.months)
-max_age_mo <- max(meta$Age.months)
+min_age_mo <- min(meta$matched.timepoint.age)
+max_age_mo <- max(meta$matched.timepoint.age)
 
-
-table(meta$Age.months < 12)
-table(meta$Age.months > 12*14)
-table(meta$Age.years)
 
 window_size <- 3 # 3 years
 age_windows_start <- seq(1, 14-window_size)
@@ -36,11 +32,11 @@ window_dat <- data.frame(window_name = paste(age_windows_start, age_window_end, 
 vst_window_list <- lapply(1:nrow(window_dat), function(i){
   min_age <- window_dat$start_age[i]
   max_age <- window_dat$end_age[i]
-  vst[, meta$Age.years >= min_age & meta$Age.years <= max_age]
+  vst[, meta$matched.timepoint.age >= min_age & meta$matched.timepoint.age <= max_age]
 })
 
 lapply(vst_window_list, dim)
-lapply(vst_window_list, function(x){table(table(x$Subject.ID))})
+lapply(vst_window_list, function(x){table(table(x$matched.individual))})
 
 for(i in seq_along(vst_window_list)){
   window_name <- window_dat$window_name[[i]]
