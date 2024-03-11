@@ -6,9 +6,9 @@ options(stringsAsFactors = FALSE)
 
 source("scripts/util/jaccard_matrix.R")
 
-CELLTYPE <- snakemake@input[["celltype"]]
+CELLTYPE <- snakemake@params[["celltype"]]
 
-IN_DIR <- "data/analysis_out/variancePartition/age_sliding_window_bootstrap_regress_cells/varpart_objects/"
+IN_DIR <- "data/analysis_out/variancePartition/age_sliding_window_bootstrap/varpart_objects/"
 
 files <- list.files(IN_DIR, full.names = TRUE)
 
@@ -18,11 +18,11 @@ files <- list.files(IN_DIR, full.names = TRUE)
 # 
 # meta_objs <- lapply(meta_files, read_tsv)
 
-META_DIR <- "data/analysis_out/variancePartition/sliding_age_window/subsetted_vst_ctrl_cells"
+META_DIR <- paste0("data/analysis_out/variancePartition/sliding_age_window/subsetted_vst_ctrl_cells_",CELLTYPE)
 meta_files <- list.files(META_DIR, full.names = TRUE)
 
 vst_objs <- lapply(meta_files, readRDS)
-meta_objs <- lapply(vst_objs, function(x){as.data.frame(colData(x))})
+meta_objs <- lapply(vst_objs, function(x){x$samples})
 
 names(meta_objs) <- sapply(strsplit(basename(meta_files), "\\."), `[[`, 1)
 names(meta_objs) <- gsub("age_", "", names(meta_objs))
@@ -35,12 +35,12 @@ meta_objs <- meta_objs[meta_obj_order]
 
 n_samp_dat <- sapply(meta_objs, nrow) %>% enframe(name = "window", value = "n_samp")
 
-n_subj_dat <- sapply(meta_objs, function(x){length(unique(x$Subject.ID))}) %>% 
+n_subj_dat <- sapply(meta_objs, function(x){length(unique(x$matched.individual))}) %>% 
         enframe(name = "window", value = "n_subj")
 
 
-subj_list <- lapply(meta_objs, `[[`, "Subject.ID")
-samp_list <- lapply(meta_objs, `[[`, "Sample_file_identifier")
+subj_list <- lapply(meta_objs, `[[`, "matched.individual")
+samp_list <- lapply(meta_objs, rownames)
 
 subj_jacc_mat <- jaccardMat(subj_list)
 samp_jacc_mat <- jaccardMat(samp_list)
