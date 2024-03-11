@@ -1,6 +1,7 @@
 library(variancePartition)
 library(BiocParallel)
 library(SummarizedExperiment)
+library(edgeR)
 library(readr)
 #library(doParallel)
 
@@ -25,14 +26,14 @@ boot <- snakemake@params[["boot"]]
 set.seed(boot)
 
 #new stuff added
-n_subj_keep <- round(length(unique(vst$matched.individual)) * .8)
-keep_subj <- sample(as.character(vst$matched.individual), size = n_subj_keep)
-vst <- vst[, as.character(vst$matched.individual) %in% as.character(keep_subj)]
+n_subj_keep <- round(length(unique(vst$samples$matched.individual)) * .8)
+keep_subj <- sample(as.character(vst$samples$matched.individual), size = n_subj_keep)
+vst <- vst[, as.character(vst$samples$matched.individual) %in% as.character(keep_subj)]
 
 writeLines(as.character(keep_subj), SUBJ.OUT.PATH)
 
 # make things factors ---------------------------------------------
-meta <- as.data.frame(colData(vst))
+meta <- vst$samples
 meta$Subject.ID <- factor(meta$matched.individual)
 meta$sex.numeric <- as.numeric(factor(meta$gender))
 meta$Age.months <- factor(meta$matched.timepoint.age * 12)

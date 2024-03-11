@@ -25,7 +25,6 @@ dge <- readRDS(DGE.IN.PATH)
 boot <- snakemake@params[["boot"]]
 set.seed(boot)
 
-
 #new stuff added
 n_subj_keep <- round(length(unique(dge$samples$matched.individual)) * .8)
 keep_subj <- sample(as.character(dge$samples$matched.individual), size = n_subj_keep)
@@ -37,7 +36,7 @@ writeLines(as.character(keep_subj), SUBJ.OUT.PATH)
 meta <- dge$samples
 meta$Subject.ID <- factor(meta$matched.individual)
 meta$sex.numeric <- as.numeric(factor(meta$gender))
-meta$Age.months <- factor(matched.timepoint.age * 12)
+meta$Age.months <- factor(meta$matched.timepoint.age * 12)
 meta$RNA.isolation.Batch <- factor(meta$batch)
 
 # Define formula --------------------------------------------------
@@ -45,8 +44,7 @@ form <- ~ (1|Subject.ID) + sex.numeric +  (1|RNA.isolation.Batch) + Age.months
 
 
 # Run variancePartition analysis ----------------------------------
-design.for.voom <- model.matrix(~RNA.isolation.Batch + Age.months, data = meta)
-v <- voom(dge, design.for.voom)
+v <- voomWithDreamWeights( dge, form, meta, suppressWarnings=TRUE)
 varPart <- fitExtractVarPartModel(v, form, meta)
 
 saveRDS(varPart, VARPART.OUT.PATH)
