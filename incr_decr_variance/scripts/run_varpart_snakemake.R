@@ -36,7 +36,7 @@ writeLines(as.character(keep_subj), SUBJ.OUT.PATH)
 meta <- dge$samples
 meta$Subject.ID <- factor(meta$matched.individual)
 meta$sex.numeric <- as.numeric(factor(meta$gender))
-meta$Age.months <- factor(meta$matched.timepoint.age * 12)
+meta$Age.months <- as.numeric(meta$matched.timepoint.age * 12)
 meta$RNA.isolation.Batch <- factor(meta$batch)
 
 # Define formula --------------------------------------------------
