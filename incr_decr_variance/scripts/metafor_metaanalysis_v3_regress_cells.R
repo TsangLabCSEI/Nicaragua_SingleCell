@@ -1,4 +1,5 @@
 library(tidyverse)
+library(dplyr)
 library(metafor)
 library(SummarizedExperiment)
 
@@ -6,7 +7,7 @@ options(stringsAsFactors = FALSE)
 
 source("scripts/util/jaccard_matrix.R")
 
-CELLTYPE <- snakemake@params[["celltype"]]
+CELLTYPE <- "B_Mem" #snakemake@params[["celltype"]]
 
 IN_DIR <- "data/analysis_out/variancePartition/age_sliding_window_bootstrap/varpart_objects/"
 
@@ -69,7 +70,7 @@ dat$boot_iter <- sapply(id_split, `[[`, 2)
 dat <- dat %>%
         mutate(window_number = as.numeric(sapply(strsplit(window, "to"), `[[`, 1)))
 
-head(dat %>% filter(gene =="DDX11L1"))
+head(dat %>% dplyr::filter(gene =="DDX11L1"))
 #head(dat)
 
 dat_renorm <- with(dat, data.frame(subj_div_all = Subject.ID,
@@ -83,7 +84,7 @@ dat_renorm <- with(dat, data.frame(subj_div_all = Subject.ID,
                         window_number = window_number,
                         gene = gene
                         ))
-head(dat_renorm %>% filter(gene =="DDX11L1"))
+head(dat_renorm %>% dplyr::filter(gene =="DDX11L1"))
 
 keepcols <- setdiff(colnames(dat_renorm), c("window", "window_number", "gene"))
 names(keepcols) <- keepcols
@@ -105,7 +106,7 @@ summ_list <- lapply(summ_list, function(x){
 
 
 SUMM_OUT_PATH <- paste0("data/analysis_out/variancePartition/age_sliding_window_bootstrap_regress_cells/gls_model_v3_include_nsubj/bootstrap_summary_dat_list_",CELLTYPE,".rds")
-dir.create(dirname(SUMM_OUT_PATH))
+dir.create(dirname(SUMM_OUT_PATH), recursive = TRUE)
 saveRDS(summ_list, SUMM_OUT_PATH)
 #summ_list <- readRDS(SUMM_OUT_PATH)
 
@@ -133,12 +134,12 @@ res_list <- lapply(summ_list["subj_div_subj_age_gender_resid"], function(summ){
     if(gene_index %% 500 == 0){
       print(gene_index)
     }
-    summ_single <- summ %>% filter(gene == gene_name) %>%
+    summ_single <- summ %>% dplyr::filter(gene == gene_name) %>%
             arrange(window_number) %>%
             mutate(yi = mean_vexp) %>%
             mutate(window_number_demeaned = window_number - median(.$window_number))
     
-    V <- combined_jacc_mat * sqrt(outer(summ_single$var_vexp, summ_single$var_vexp))
+    V <- combined_jacc_mat * as.vector(sqrt(outer(summ_single$var_vexp, summ_single$var_vexp)))
     
     tryCatch({
     mod <- rma.mv(yi ~ window_number_demeaned + n_subj, V, data = summ_single) 
