@@ -8,7 +8,7 @@ options(stringsAsFactors = FALSE)
 
 source("scripts/util/jaccard_matrix.R")
 
-CELLTYPE <- "B_Mem" #snakemake@params[["celltype"]]
+CELLTYPE <- snakemake@params[["celltype"]]
 
 IN_DIR <- "data/analysis_out/variancePartition/age_sliding_window_bootstrap/varpart_objects/"
 
