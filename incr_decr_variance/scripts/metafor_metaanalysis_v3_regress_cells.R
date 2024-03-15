@@ -1,5 +1,6 @@
 library(tidyverse)
 library(dplyr)
+library(stringr)
 library(metafor)
 library(SummarizedExperiment)
 
@@ -12,6 +13,7 @@ CELLTYPE <- "B_Mem" #snakemake@params[["celltype"]]
 IN_DIR <- "data/analysis_out/variancePartition/age_sliding_window_bootstrap/varpart_objects/"
 
 files <- list.files(IN_DIR, full.names = TRUE)
+files <- files[str_detect(files,CELLTYPE)]
 
 # META_DIR <- "data/analysis_out/variancePartition/age_sliding_window/metadata_subsets/"
 # 
