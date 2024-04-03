@@ -1,0 +1,30 @@
+{
+    "__default__" :
+    {
+        "mem_free" : "10G",
+        "h_vmem" : "10G",
+        "parallel_opts" : ""
+
+    },
+    "prep_snps_mat_cis" :
+    {
+        "mem_free" : "30G",
+        "h_vmem" : "30G"
+    },
+    "metafor_metaanalysis_v3" :
+    {
+        "mem_free" : "30G",
+        "h_vmem" : "30G"
+    },
+    "metafor_metaanalysis_v3_ctrl_cells" :
+    {
+        "mem_free" : "30G",
+        "h_vmem" : "30G"
+    },
+    "metafor_metaanalysis_v3_regress_cells" :
+    {
+        "mem_free" : "30G",
+        "h_vmem" : "30G"
+    }
+
+}
