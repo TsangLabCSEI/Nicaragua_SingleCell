@@ -2,7 +2,7 @@ Package: ImmuneAgeStability
 Title: An Rpackage to retrieve age stability information for immune response gene signatures 
 Version: 0.0.0.0
 Authors@R: 
-    person("Leon", "Bichmann")
+    person("Leon", "Bichmann","leon.bichmann@yale.edu", role = c("aut", "cre"))
 Description: ImmuneAgeStability is a lightweight R package to easily retrieve age stability information on immune response gene signatures. The information is based on subject variance computed across a large cohort of nicaraguan children on bulk and single cell RNAseq expression values. 
 License: `use_mit_license()`
 Encoding: UTF-8
@@ -11,6 +11,13 @@ RoxygenNote: 7.3.1
 Depends: 
     R (>= 2.10)
 LazyData: true
+Imports:
+    ggplot2,
+    RColorBrewer,
+    vioplot,
+    fmsb,
+    multcomp,
+    scales
 Suggests: 
     knitr,
     rmarkdown
