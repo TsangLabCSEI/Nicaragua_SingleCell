@@ -69,7 +69,7 @@ compute_signature_stability_rateofchange<-function(signature_name,signature){
     svar_df_sig$n_genes<-length(unique(svar_df_sig$gene))
     svar_df_sig<-svar_df_sig[svar_df_sig$window_number<9,]
     svar_df_sig_window<-svar_df_sig %>% group_by(window_number) %>% summarise(mean_vexp_ct=mean(mean_vexp))
-    svar_sig_df_list_ct[[paste0(sig,"_",ct)]]<-svar_df_sig
+    svar_sig_df_list_ct[[ct]]<-svar_df_sig
   }
   svar_rate_sig_df<-do.call(rbind, svar_sig_df_list_ct)
   return(svar_rate_sig_df)
