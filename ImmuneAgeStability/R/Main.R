@@ -43,10 +43,11 @@ compute_multisignature_stability<-function(signatures){
   for (sig in names(signatures)){
     subj_vars<-list()
     for (ct in unique(gene_stability_all$celltype)){
+      if (ct!="ILC"){
       df_svar<-gene_stability_all[gene_stability_all$celltype==ct,]
       df_svar<-df_svar[df_svar$gene %in% signatures[[sig]],]
       df_svar<-df_svar[!is.na(df_svar$batch),]
-      subj_vars[[ct]]<-cbind(df_svar$subject_variance_explained,ct)
+      subj_vars[[ct]]<-cbind(df_svar$subject_variance_explained,ct)}
     }
     df_svar_ct<-as.data.frame(do.call(rbind,subj_vars))
     colnames(df_svar_ct)<-c("subject_variance","celltype")
