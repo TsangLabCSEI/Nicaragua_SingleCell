@@ -1,0 +1,210 @@
+---
+title: "Heatmap - subject variability of highly subject specific functional genes"
+output: html_notebook
+---
+
+
+```{r}
+# set seed
+set.seed(4)
+
+# load libraries
+library(Seurat)
+library(pheatmap)
+library(stringr)
+library(patchwork)
+
+
+# load data
+nrchd_gene_df<-read.csv("/Users/leon/Documents/NICA/sc_analysis/data/supp_tables_S10.csv") # bulk rna enriched genesets
+bulk_subj_var_gene_df<-read.csv("/Users/leon/Documents/NICA/sc_analysis/data/supp_tables_S9.csv") # bulk rna subject variance
+rownames(bulk_subj_var_gene_df)<-bulk_subj_var_gene_df$Gene
+enrichment_df<-readRDS("/Users/leon/Documents/NICA/sc_analysis/data/NICA_batch2to4_new_timepoints_fsex_subject_enriched_with_labels.rds") # single cell rna enriched genesets
+enrichment_df<-enrichment_df[str_detect(enrichment_df$pathway,"btm"),]
+vpars<-readRDS("/Users/leon/Documents/NICA/sc_analysis/data/NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_vpars_object.rds") # single cell gene-wise variance partition
+inh<-read.csv("/Users/leon/Documents/NICA/sc_analysis/data/inheritability_data_pvals.csv") # hertability data of gene expression (Wright et al 2014, Nat Genet.)
+inh777<-read.csv("/Users/leon/Documents/NICA/sc_analysis/data/inheritability_data_777.csv")
+inh777<-inh777$X
+inh777<-inh[which(inh$probe.id %in% inh777),]$gene.symbol
+```
+
+```{r}
+# adapt loaded geneset list
+genesetl<-list()
+for (i in seq(1,nrow(nrchd_gene_df))){
+  gset<-unlist(str_split(nrchd_gene_df$leadingEdge[i]," "))
+  genesetl[[paste(str_split(nrchd_gene_df$pathway[i],"_")[[1]][2:3],collapse="_")]]<-gset
+}
+
+
+# reformat subject variance data
+ledge<-unique(unlist(enrichment_df$leadingEdge))
+vpars_h<-vpars[c("subject_variance_explained","celltype","gene")]
+vpars_h<-vpars_h[which(!(vpars_h$celltype %in% c("ILC","doublets"))),]
+vpars_h<-reshape(vpars_h, idvar = "gene", timevar = "celltype", direction = "wide")
+vpars_h[is.na(vpars_h)]<-0
+genes<-vpars_h$gene
+vpars_h<-vpars_h[which(colnames(vpars_h)!="gene")]
+vpars_h<-sapply(vpars_h, as.numeric)
+row.names(vpars_h)<-genes
+colnames(vpars_h)<-as.vector(sapply(colnames(vpars_h),function(x){str_split_i(x,"\\.",2)}))
+vpars_h<-vpars_h[which(rownames(vpars_h) %in% unlist(ledge)),]
+
+
+# collect and reformat heatmap annotations
+ledge_list<-list()
+for (pway in unique(enrichment_df$pathway)){ 
+  ledge<-unique(unlist(enrichment_df[which(enrichment_df$pathway==pway),]$leadingEdge))
+  pway<-str_split_i(pway,"btm_",2)
+  ledge_list[[pway]]<-ledge
+}
+
+#leading edge genes from bulk enriched pathways
+p_annot_l<-list()
+for (p in names(ledge_list)){
+    p_annot<-as.numeric(rownames(vpars_h) %in% ledge_list[[p]])
+    if(str_detect(p,"M61") | str_detect(p,"M7.2")){
+      p_annot<-as.numeric(rownames(vpars_h) %in% ledge_list[["M61.0_enriched in NK cells (II)"]] | rownames(vpars_h) %in% ledge_list[["M7.2_enriched in NK cells (I)"]])
+      p="M7.2_M61_enriched in NK cells (I/II)"
+    }
+    if(str_detect(p,"M11") | str_detect(p,"M118")){
+      p_annot<-as.numeric(rownames(vpars_h) %in% ledge_list[["M11.0_enriched in monocytes (II)"]] | rownames(vpars_h) %in% ledge_list[["M118.0_enriched in monocytes (IV)"]])
+      p="M11_M118_enriched in monocytes (II/IV)"
+    }
+    if(str_detect(p,"M69") | str_detect(p,"M47") | str_detect(p,"M47.2")){
+      p_annot<-as.numeric(rownames(vpars_h) %in% ledge_list[["M47.0_enriched in B cells (I)"]] | rownames(vpars_h) %in% ledge_list[["M47.2_enriched in B cells (III)"]] | rownames(vpars_h) %in% ledge_list[["M69_enriched in B cells (VI)"]])
+      p="M47_M47.2_M69_enriched in B cells (I/III/VI)"
+    }
+    if(p=="M5.0_regulation of antigen presentation and immune response"){
+      p<-"M5.0_regulation of antigen presentation & immune response        "
+    }
+
+    p_annot_l[[p]]<-p_annot
+}
+p_annot_l<-as.data.frame(do.call(cbind,p_annot_l))
+rownames(p_annot_l)<-rownames(vpars_h)
+p_annot_l<-p_annot_l[!str_detect(colnames(p_annot_l),"extracell")]
+p_annot_l<-p_annot_l[!str_detect(colnames(p_annot_l),"cell cycle")]
+p_annot_l<-p_annot_l[!str_detect(colnames(p_annot_l),"regulation in cell")]
+
+#inheritable gens
+p_annot<-as.numeric(rownames(vpars_h) %in% inh777)
+p_annot_l$"HERITABILITY (Wright et al.,Nature Genetics 2014)"<-p_annot
+
+#clusterID
+p<-pheatmap(t(vpars_h), scale="none", clustering_distance_cols="correlation", cutree_cols = 4, silent = T)
+
+#subjectVar bulk RNA
+p_annot_l$VES_bulk<-bulk_subj_var_gene_df[rownames(p_annot_l),]$Subject.ID
+
+# plot heatmap
+p_annot_l$clusterid<-NULL
+pheatmap(t(vpars_h), scale="none", main="all", fontsize_row=12, fontsize=8, fontsize_col = 1, legend = TRUE, annotation_legend = FALSE ,annotation_col=p_annot_l, clustering_distance_cols="correlation", cutree_cols = 4, color=magma(100))
+```
+
+
+
+```{r}
+#visualize variance partitioning for top20 genes per main cluster
+p_annot_l$clusterid<-cutree(p$tree_col, k = 4)[rownames(vpars_h)]
+
+#var_b (Bcell dominated cluster)
+var_b<-vpars[vpars$gene %in% row.names(p_annot_l[which(p_annot_l$clusterid==4),]),]
+var_b<-var_b %>% group_by(gene) %>% dplyr::slice(which.max(subject_variance_explained)) %>% as.data.frame()
+var_b<-head(var_b[order(var_b$subject_variance_explained, decreasing = T),],20)
+colnames(var_b)<-c("batch","Subject","Sex","Residuals","Age","celltype","gene")
+var_b<-melt(var_b[c("Subject","Sex","Residuals","Age","gene")])
+scale_df<-as.data.frame(var_b %>% group_by(gene) %>% summarize(scalefactor=1/sum(value)))
+var_b<-merge(var_b,scale_df,)
+var_b$value<-var_b$value*var_b$scalefactor
+var_b<-var_b[order(var_b$value, decreasing = T),]
+var_b$variable<-factor(var_b$variable,levels=c("Residuals","Age","Sex","Subject"))
+p2<-ggplot(data=var_b,aes(y=gene,x=value,group=variable,fill=variable))+geom_bar(stat='identity',colour="black",size=0.25)+scale_y_discrete(limits = rev(head(var_b,20)$gene)) + theme_classic() + labs(title="Bcells") + scale_fill_manual(values=c("white","#619CFF","#00BA38","#F8766D")) 
+
+var_b$heritability<-NA
+var_b$heritability[which(var_b$gene %in% inh777)]<-1
+p1 <- ggplot(var_b, aes(x = 0,  y = gene, size=factor(heritability), color="red")) +geom_point()+scale_y_discrete(limits = rev(head(var_b,20)$gene)) +theme_minimal() + theme(axis.text = element_blank(), axis.title = element_blank(),panel.grid = element_blank())
+pp1<-(p2 + theme(legend.position="none") | p1 + theme(legend.position="none")) + plot_layout(widths = c(10, 1))
+
+
+#var_t (Tcell dominated cluster)
+var_t<-vpars[vpars$gene %in% row.names(p_annot_l[which(p_annot_l$clusterid==2),]),]
+var_t<-var_t %>% group_by(gene) %>% dplyr::slice(which.max(subject_variance_explained)) %>% as.data.frame()
+var_t<-head(var_t[order(var_t$subject_variance_explained, decreasing = T),],20)
+colnames(var_t)<-c("batch","Subject","Sex","Residuals","Age","celltype","gene")
+var_t<-melt(var_t[c("Subject","Sex","Residuals","Age","gene")])
+scale_df<-as.data.frame(var_t %>% group_by(gene) %>% summarize(scalefactor=1/sum(value)))
+var_t<-merge(var_t,scale_df,)
+var_t$value<-var_t$value*var_t$scalefactor
+var_t<-var_t[order(var_t$value, decreasing = T),]
+var_t$variable<-factor(var_t$variable,levels=c("Residuals","Age","Sex","Subject"))
+p2<-ggplot(data=var_t,aes(y=gene,x=value,group=variable,fill=variable))+geom_bar(stat='identity',colour="black",size=0.25)+scale_y_discrete(limits = rev(head(var_t,20)$gene)) + theme_classic() + labs(title="Tcells") + scale_fill_manual(values=c("white","#619CFF","#00BA38","#F8766D")) 
+
+var_t$heritability<-NA
+var_t$heritability[which(var_t$gene %in% inh777)]<-1
+p1 <- ggplot(var_t, aes(x = 0,  y = gene, size=factor(heritability), color="red")) +geom_point()+scale_y_discrete(limits = rev(head(var_t,20)$gene)) +theme_minimal() + theme(axis.text = element_blank(), axis.title = element_blank(),panel.grid = element_blank())
+pp2<-(p2 + theme(legend.position="none") | p1 + theme(legend.position="none")) + plot_layout(widths = c(10, 1))
+
+
+#var_n (NKcell dominated cluster)
+var_n<-vpars[vpars$gene %in% row.names(p_annot_l[which(p_annot_l$clusterid==3),]),]
+var_n<-var_n %>% group_by(gene) %>% dplyr::slice(which.max(subject_variance_explained)) %>% as.data.frame()
+var_n<-head(var_n[order(var_n$subject_variance_explained, decreasing = T),],20)
+colnames(var_n)<-c("batch","Subject","Sex","Residuals","Age","celltype","gene")
+var_n<-melt(var_n[c("Subject","Sex","Residuals","Age","gene")])
+scale_df<-as.data.frame(var_n %>% group_by(gene) %>% summarize(scalefactor=1/sum(value)))
+var_n<-merge(var_n,scale_df,)
+var_n$value<-var_n$value*var_n$scalefactor
+var_n<-var_n[order(var_n$value, decreasing = T),]
+var_n$variable<-factor(var_n$variable,levels=c("Residuals","Age","Sex","Subject"))
+p2<-ggplot(data=var_n,aes(y=gene,x=value,group=variable,fill=variable))+geom_bar(stat='identity',colour="black",size=0.25)+scale_y_discrete(limits = rev(head(var_n,20)$gene)) + theme_classic() + labs(title="NKcells") + scale_fill_manual(values=c("white","#619CFF","#00BA38","#F8766D")) 
+
+var_n$heritability<-NA
+var_n$heritability[which(var_n$gene %in% inh777)]<-1
+p1 <- ggplot(var_n, aes(x = 0,  y = gene, size=factor(heritability), color="red")) +geom_point()+scale_y_discrete(limits = rev(head(var_n,20)$gene)) +theme_minimal() + theme(axis.text = element_blank(), axis.title = element_blank(),panel.grid = element_blank())
+pp3<-(p2 + theme(legend.position="none") | p1 + theme(legend.position="none")) + plot_layout(widths = c(10, 1))
+
+
+#var_m (Monocyte dominated cluster)
+var_m<-vpars[vpars$gene %in% row.names(p_annot_l[which(p_annot_l$clusterid==1),]),]
+var_m<-var_m %>% group_by(gene) %>% dplyr::slice(which.max(subject_variance_explained)) %>% as.data.frame()
+var_m<-head(var_m[order(var_m$subject_variance_explained, decreasing = T),],20)
+colnames(var_m)<-c("batch","Subject","Sex","Residuals","Age","celltype","gene")
+var_m<-melt(var_m[c("Subject","Sex","Residuals","Age","gene")])
+scale_df<-as.data.frame(var_m %>% group_by(gene) %>% summarize(scalefactor=1/sum(value)))
+var_m<-merge(var_m,scale_df,)
+var_m$value<-var_m$value*var_m$scalefactor
+var_m<-var_m[order(var_m$value, decreasing = T),]
+var_m$variable<-factor(var_m$variable,levels=c("Residuals","Age","Sex","Subject"))
+p2<-ggplot(data=var_m,aes(y=gene,x=value,group=variable,fill=variable))+geom_bar(stat='identity',colour="black",size=0.25)+scale_y_discrete(limits = rev(head(var_m,20)$gene)) + theme_classic() + labs(title="Monocytes") + scale_fill_manual(values=c("white","#619CFF","#00BA38","#F8766D")) 
+
+var_m$heritability<-NA
+var_m$heritability[which(var_m$gene %in% inh777)]<-1
+p1 <- ggplot(var_m, aes(x = 0,  y = gene, size=factor(heritability), color="red")) +geom_point()+scale_y_discrete(limits = rev(head(var_m,20)$gene)) +theme_minimal() + theme(axis.text = element_blank(), axis.title = element_blank(),panel.grid = element_blank())
+pp4<-(p2 + theme(legend.position="none") | p1 + theme(legend.position="none")) + plot_layout(widths = c(10, 1))
+
+
+p2
+p1
+pp1
+pp2
+pp3
+pp4
+```
+
+```{r}
+#visualize subject variance partitioning for selected immune response signatures
+
+sigs<-ImmuneAgeStability::baseline_signatures[c("TGSig20","IHM","IFN","ia_bcell","iaa","GPR56highvslow_CD8_EM_sig","DE_CD29hi_CD8_genes")]
+names(sigs)<-c("TGSig20","IHM","IFN","IAB B-cell","IAA","CD8 VM GPR56hi","CD8 VM CD29hi")
+multisignature_stability_df<-ImmuneAgeStability::compute_multisignature_stability(sigs)
+ImmuneAgeStability::plot_signature_stability_heatmap(multisignature_stability_df)
+```
+
+
+```{r}
+#visualize subject variance time trends for selected immune response signature
+
+stability_slope_df<-ImmuneAgeStability::compute_signature_stability_slope(signature_name = "IAB-Bcell", signature = ImmuneAgeStability::baseline_signatures$ia_bcell)
+ImmuneAgeStability::plot_signature_stability_bars(stability_slope_df)
+```

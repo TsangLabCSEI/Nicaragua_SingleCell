@@ -1,0 +1,282 @@
+---
+title: "Age & Subject gene set enrichment + visualization"
+output: html_notebook
+---
+
+
+```{r}
+#load libraries
+library(ggplot2)
+library(fgsea)
+library(edgeR)
+library(reshape2) 
+```
+
+
+```{r}
+#load age-trajectory cluster data
+cluster_gene_df<-read.csv("/Users/leon/Documents/NICA/sc_analysis/data/supp_tables_S6.csv")
+c1_markers<-cluster_gene_df[which(cluster_gene_df$Cluster==1),]$Gene
+c2_markers<-cluster_gene_df[which(cluster_gene_df$Cluster==2),]$Gene
+c3_markers<-cluster_gene_df[which(cluster_gene_df$Cluster==3),]$Gene
+c4_markers<-cluster_gene_df[which(cluster_gene_df$Cluster==4),]$Gene
+c5_markers<-cluster_gene_df[which(cluster_gene_df$Cluster==5),]$Gene
+c6_markers<-cluster_gene_df[which(cluster_gene_df$Cluster==6),]$Gene
+c7_markers<-cluster_gene_df[which(cluster_gene_df$Cluster==7),]$Gene
+c8_markers<-cluster_gene_df[which(cluster_gene_df$Cluster==8),]$Gene
+
+# bulk RNAseq subject-variance enriched genesets
+nrchd_gene_df<-read.csv("/Users/leon/Documents/NICA/sc_analysis/data/supp_tables_S10.csv") 
+
+
+#create list of cluster genesets
+genesetl<-list()
+genesetl[["C1: Bcells,\n lymphocyte activation"]]<-c1_markers
+genesetl[["C2: tRNA processing,\n hydrogen peroxide,\n hemoglobin,translation"]]<-c2_markers
+genesetl[["C3: Steroid hormones,\n leukocyte adhesion"]]<-c3_markers
+genesetl[["C4: Ox.reductase activity"]]<-c4_markers
+genesetl[["C5: Cell cycle,division,\n interferon response"]]<-c5_markers
+genesetl[["C6: Adhesion, proliferation,\n cytoskeleton"]]<-c6_markers
+genesetl[["C7: Integrins, Hormones"]]<-c7_markers
+genesetl[["C8: Ig heavy and light chain,\n B cells, cell cycle"]]<-c8_markers
+#genesetl[["IFN genes"]]<-inf_marker
+#genesetl[["Steroid genes"]]<-strd_marker
+
+#load variance partitioning results
+vpars<-readRDS("/Users/leon/Documents/NICA/sc_analysis/data/NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_vpars_object.rds") # aggregated
+all_tts<-readRDS("/Users/leon/Documents/NICA/sc_analysis/data/NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_spline.rds") #raw with stats
+
+#load normalized pseudobulk scRNAseq data
+dge <- readRDS("/Users/leon/Documents/NICA/sc_analysis/data/NICA_batch2to4_new_timepoints_cleaned_normalized.rds")
+```
+
+```{r}
+### Computation of age variance gene set enrichments
+
+#set seed
+set.seed(1)
+
+#enrich age-sorted list
+enrichment_list<-list()
+for (ct in unique(vpars$celltype)){
+  vpars_ct<-vpars[which(!(vpars$celltype %in% c("doublets"))),]
+  ranks <- vpars_ct[which(vpars_ct$celltype==ct),]$age_variance_explained
+  names(ranks)<-vpars_ct[which(vpars_ct$celltype==ct),]$gene
+  ranks <- sort(ranks, decreasing = T)
+
+  enrichment_list[[ct]]<-fgsea(pathways = genesetl, ranks)
+  enrichment_list[[ct]]<-enrichment_list[[ct]][enrichment_list[[ct]]$pval<=0.05]
+  enrichment_list[[ct]]$celltype<-ct
+}
+
+enrichment_df<-do.call(rbind,enrichment_list)
+enrichment_df$nlog_pval<-(-log10(enrichment_df$pval))
+enrichment_df$celltype<-as.vector(sapply(enrichment_df$celltype,function(x){gsub("NonClassical","N.C.",x)}))
+
+
+ggplot(
+  data=enrichment_df, 
+  aes(y=pathway, x=celltype,colour=NES)) + geom_point(aes(size=nlog_pval)) + theme_bw() + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), text = element_text(size=18)) + scale_y_discrete(position = "right")
+```
+
+```{r}
+### Correlation analysis of bulk cluster 3 gene module with age across celltypes
+cluster_tt_means<-list()
+for (ct in names(all_tts)[which(!(names(all_tts) %in% c("doublets","ILC")))]){
+print(ct)
+dge_c<-dge[[ct]]
+dge_c$normalizedExpr <- dge_c$normalizedExpr[, which(as.numeric(dge_c$samples$matched.timepoint.age)<=14)]
+tt<-all_tts[[ct]]
+tt$cell.type<-ct
+tt$gene<-row.names(tt)
+overlap<-tt[which((tt$P.Value<0.05)&(tt$gene%in%c3_markers)&(tt$cell.type==ct)),]$gene
+tps<-as.vector(sapply(colnames(dge_c$normalizedExpr),function(x){as.numeric(str_split_i(x,"_",2))}))
+inds<-as.vector(sapply(colnames(dge_c$normalizedExpr),function(x){str_split_i(x,"_",1)}))
+dge_t<-as.data.frame(t(dge_c$normalizedExpr))
+dge_t<-as.data.frame(scale(dge_t,scale = FALSE, center=TRUE))
+dge_t$timepoints<-tps
+dge_t$individuals<-inds
+dge_t<-dge_t[which(!is.na(dge_t$timepoints)),]
+
+dfm<-melt(dge_t,id.vars = "timepoints",measure.vars = overlap)#
+df2 <- dfm %>% group_by(timepoints,variable) %>% summarise(across(value,median),.groups = 'drop') %>%as.data.frame()
+
+data<-reshape(df2, idvar = "variable", timevar = "timepoints", direction = "wide")
+if(!"value.17" %in% names(data)){
+  data$value.17<-NA
+}
+if(!"value.16" %in% names(data)){
+  data$value.16<-NA
+}
+if(!"value.15" %in% names(data)){
+  data$value.15<-NA
+}
+if(!"value.2" %in% names(data)){
+  data$value.2<-NA
+}
+data2<-data[,seq(2,17)]
+
+data2<-sapply(data2,as.numeric)
+colnames(data2)<-as.vector(sapply(colnames(data2),function(x){str_split_i(x,"value.",2)}))
+row.names(data2)<-data$variable
+cluster_tt_means[[ct]]<-colMeans(data2)
+}
+data3<-melt(do.call(cbind,cluster_tt_means))
+colnames(data3)<-c("timepoints","celltype","value")
+ggplot(
+  data=data3, #c("B_Mem","B_Naive","CD4_Naive","CD4_Mem","CD8_Mem","CD8_Naive","MAIT","Mono_Classical","gdT_Vd2", "NK_CD16hi"))
+  aes(x=timepoints, y=value,color=celltype)) + stat_smooth(geom='line', alpha=0.25, se=FALSE) + stat_smooth(data=data3[which(data3$celltype %in% c("B_Naive","B_Mem","CD4_Naive","CD4_Mem","CD8_Mem","CD8_Naive","MAIT","gdT_Vd1","gdT_Vd2","Mono_Classical","NK_CD16hi")),], geom='line', se=FALSE) + theme_classic()+ theme(text = element_text(size=15)) + scale_x_continuous(limits=c(3, 14),breaks=seq(3,14,2))+ggtitle("C3: Steroid response module across celltypes")+theme(legend.position = "none")
+
+data3<-data3[!is.na(data3$value),]
+cor.list<-list()
+for (ct in unique(data3$celltype)){
+    model<-augment(loess(value ~ timepoints, data = data3[data3$celltype==ct,]),data3[data3$celltype==ct,])
+    cor.list[[ct]]<-cor.test(model$timepoints,model$.fitted,method = "spearman")$p.value
+    if(cor.list[[ct]]<=0.05){
+        print(ct)
+    }
+}
+```
+
+```{r}
+### Correlation analysis of bulk cluster 5 gene module with age across celltypes
+cluster_tt_means<-list()
+for (ct in names(all_tts)[which(!(names(all_tts) %in% c("doublets","ILC")))]){
+print(ct)
+dge_c<-dge[[ct]]
+dge_c$normalizedExpr <- as.data.frame(dge_c$normalizedExpr)[, which(as.numeric(dge_c$samples$matched.timepoint.age)<=14)]
+tt<-all_tts[[ct]]
+tt$cell.type<-ct
+tt$gene<-row.names(tt)
+overlap<-tt[which((tt$P.Value<1)&(tt$gene%in%c5_markers)&(tt$cell.type==ct)),]$gene
+tps<-as.vector(sapply(colnames(dge_c$normalizedExpr),function(x){as.numeric(str_split_i(x,"_",2))}))
+inds<-as.vector(sapply(colnames(dge_c$normalizedExpr),function(x){str_split_i(x,"_",1)}))
+dge_t<-as.data.frame(t(dge_c$normalizedExpr))
+dge_t<-as.data.frame(scale(dge_t,scale = FALSE, center=TRUE))
+dge_t$timepoints<-tps
+dge_t$individuals<-inds
+dge_t<-dge_t[which(!is.na(dge_t$timepoints)),]
+
+dfm<-melt(dge_t,id.vars = "timepoints",measure.vars = overlap)#
+df2 <- dfm %>% group_by(timepoints,variable) %>% summarise(across(value,median),.groups = 'drop') %>%as.data.frame()
+
+data<-reshape(df2, idvar = "variable", timevar = "timepoints", direction = "wide")
+if(!"value.17" %in% names(data)){
+  data$value.17<-NA
+}
+if(!"value.16" %in% names(data)){
+  data$value.16<-NA
+}
+if(!"value.15" %in% names(data)){
+  data$value.15<-NA
+}
+if(!"value.2" %in% names(data)){
+  data$value.2<-NA
+}
+data2<-data[,seq(2,17)]
+data2<-sapply(data2,as.numeric)
+colnames(data2)<-as.vector(sapply(colnames(data2),function(x){str_split_i(x,"value.",2)}))
+row.names(data2)<-data$variable
+cluster_tt_means[[ct]]<-colMeans(data2)
+}
+data3<-melt(do.call(cbind,cluster_tt_means))
+colnames(data3)<-c("timepoints","celltype","value")
+ggplot(
+  data=data3, 
+  aes(x=timepoints, y=value,color=celltype)) + stat_smooth(geom='line', alpha=0.25, se=FALSE, span=1) + stat_smooth(data=data3[which(data3$celltype %in% c("B_Naive","B_Mem","CD4_Naive","CD4_Mem","CD8_Naive","CD8_Mem","cDC","MAIT","gdT_Vd1","gdT_Vd2","Mono_Classical","Mono_NonClassical","NK_CD16hi")),], geom='line', se=FALSE, span=1) + theme_classic()+ theme(text = element_text(size=15)) + scale_x_continuous(limits=c(3, 14),breaks=seq(3,14,2))+ggtitle("C5: IFN response module across celltypes")+theme(legend.position = "none")
+
+
+data3<-data3[!is.na(data3$value),]
+cor.list<-list()
+for (ct in unique(data3$celltype)){
+    model<-augment(loess(value ~ timepoints, data = data3[data3$celltype==ct,]),data3[data3$celltype==ct,])
+    cor.list[[ct]]<-cor.test(model$timepoints,model$.fitted,method = "spearman")$p.value
+    if(cor.list[[ct]]<=0.05){
+        print(ct)
+    }
+}
+```
+
+```{r}
+### Computation of subject variance gene set enrichments
+
+#set seed
+set.seed(4)
+
+genesetl<-list()
+for (i in seq(1,nrow(nrchd_gene_df))){
+  gset<-unlist(str_split(nrchd_gene_df$leadingEdge[i]," "))
+  genesetl[[paste(str_split(nrchd_gene_df$pathway[i],"_")[[1]][2:3],collapse="_")]]<-gset
+}
+
+#enrich subject-sorted list
+enrichment_list<-list()
+for (ct in unique(vpars$celltype)){
+  vpars_ct<-vpars[which(!(vpars$celltype %in% c("doublets"))),]
+  ranks <- vpars_ct[which(vpars_ct$celltype==ct),]$subject_variance_explained
+  names(ranks)<-vpars_ct[which(vpars_ct$celltype==ct),]$gene
+  ranks <- sort(ranks, decreasing = F)
+
+  enrichment_list[[ct]]<-fgsea(pathways = genesetl, ranks)
+  enrichment_list[[ct]]<-enrichment_list[[ct]][enrichment_list[[ct]]$padj<0.05]
+  enrichment_list[[ct]]$celltype<-ct
+}
+
+enrichment_df<-do.call(rbind,enrichment_list)
+enrichment_df$nlog_pval<-(-log10(enrichment_df$padj))
+```
+
+
+
+```{r}
+#Visualization of expression of a steroid hormone gene NR3C2 across individuals and age
+dge_cd4n<-dge$CD4_Naive
+df<-cbind(scale(dge_cd4n$normalizedExpr["NR3C2",]),dge_cd4n$samples$matched.individual,dge_cd4n$samples$matched.timepoint.age,dge_cd4n$samples$gender)
+colnames(df)<-c("expression","individual","age","gender")
+df<-as.data.frame(df)
+df$expression<-as.numeric(df$expression)
+df$age<-as.numeric(df$age)
+ggplot(df[df$individual!="nica4416",],aes(x=age,y=expression,group=individual,color=individual))+geom_point()+geom_smooth(se = F, formula = 'y ~ log(x)', method = 'lm') + theme_bw() + ggtitle("NR3C2 - CD4_Naive") + scale_x_continuous(limits=c(3, 14),breaks=seq(3,14,2))
+```
+
+```{r}
+#Visualization of expression of a IFN response gene IRF7 across individuals and age
+dge_cd4n<-dge$CD8_Naive
+df<-cbind(scale(dge_cd4n$normalizedExpr["IRF7",]),dge_cd4n$samples$matched.individual,dge_cd4n$samples$matched.timepoint.age)
+colnames(df)<-c("expression","individual","age")
+df<-as.data.frame(df)
+df$expression<-as.numeric(df$expression)
+df$age<-as.numeric(df$age)
+ggplot(df[df$individual!="nica4416",],aes(x=age,y=expression,color=individual))+geom_point()+geom_smooth(se = F, formula = 'y ~ log(x)', method = 'lm') + theme_bw() + ggtitle("IRF7 - CD8_Naive") + scale_x_continuous(limits=c(3, 14),breaks=seq(3,14,2))
+```
+
+
+```{r}
+### Correlation analysis of mean expression and scVES per gene and celltype
+vpars_list<-list()
+for (ct in names(dge)){
+dge_cd4n<-dge[[ct]]
+df<-rowMeans(dge_cd4n$normalizedExpr)
+genes<-names(df)
+vpars_cd4n<-vpars[vpars$celltype==ct,]
+genes<-intersect(genes,vpars_cd4n$gene)
+df_corr<-cbind(df[genes],vpars_cd4n[genes,]$subject_variance_explained)
+colnames(df_corr)<-c("mean_geneExpr","scVES")
+df_corr<-as.data.frame(df_corr)
+df_corr<-df_corr[!is.na(df_corr$scVES),]
+p<-plot(df_corr$mean_geneExpr,df_corr$scVES, main=ct)
+ss10 <- smooth.spline(df_corr$mean_geneExpr,df_corr$scVES, df = 10)
+lines(ss10, lty = 2, col = "red", lwd=2)
+x <- as.vector(df_corr$mean_geneExpr)
+y <- as.vector(df_corr$scVES)
+fit_linear <- lm(y ~ x)
+linear_residuals <- fit_linear$residuals
+#vpars_ct<-vpars[vpars$celltype==ct,]
+#vpars[vpars$celltype==ct,][rownames(df_corr),"subject_variance_explained"]<-linear_residuals
+#vpars_ct[rownames(df_corr),]$"subject_variance_explained"<-linear_residuals
+df<-as.data.frame(cbind(linear_residuals,rep(ct,length(linear_residuals)),rownames(df_corr)))
+colnames(df)<-c("subject_variance_explained","celltype","gene")
+vpars_list[[ct]]<-df
+}
+vpars<-do.call(rbind,vpars_list)
+```
