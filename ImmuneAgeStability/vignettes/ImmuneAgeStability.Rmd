@@ -1,0 +1,65 @@
+---
+title: "ImmuneAgeStability - R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook to guide you on how to use the "ImmuneAgeStability Rpackage".
+
+### Introduction
+```{r setup}
+### load the package
+library(ImmuneAgeStability)
+```
+
+
+```{r}
+### baseline immune response signatures
+print(names(baseline_signatures))
+
+### age trajectories
+print(names(age_trajectories))
+
+### stable genes
+print(names(stable_genes))
+
+```
+
+### Compute an overview of subject variabiity for multiple signatures across immune celltypes:
+```{r}
+multisignature_stability_df<-compute_multisignature_stability(baseline_signatures)
+plot_signature_stability_heatmap(multisignature_stability_df)
+```
+
+
+### Compute an overview of subject variabiity for your input signature across immune celltypes:
+```{r}
+stability_df<-compute_signature_stability(signature = baseline_signatures$TGSig)
+plot_signature_stability(signature_name = "TGSig",signature_stability_df = stability_df)
+```
+
+### Compute an overview on how subject variabiity for your input signature changes with age across celltypes as bars:
+
+```{r}
+stability_slope_df<-compute_signature_stability_slope(signature_name = "IFN", signature = baseline_signatures$IFN)
+plot_signature_stability_bars(stability_slope_df)
+```
+
+### Compute an overview on how subject variabiity for your input signature changes with age across celltypes as normalized radar:
+
+```{r}
+stability_slope_df<-compute_signature_stability_slope(signature_name = "IFN", signature = baseline_signatures$IFN)
+plot_signature_stability_radar(stability_slope_df)
+```
+### Plot explicitly how subject variabiity for your input signature changes with age for selected celltypes:
+
+```{r}
+stability_rateOfchange_df<-compute_signature_stability_rateofchange(signature_name = "IFN", signature = baseline_signatures$IFN)
+plot_signature_agetrend(signature_rateOfchange = stability_rateOfchange_df,cell_subsets = c("Mono_Classical","Mono_NonClassical","bulk"))
+```
+
+### Plot explicitly how subject variabiity for your input signature changes with age for selected genes and celltypes:
+
+```{r}
+stability_rateOfchange_df<-compute_signature_stability_rateofchange(signature_name = "IFN - genes", signature = age_trajectories$`IFN genes`)
+plot_signature_gene_agetrend(signature_rateOfchange = stability_rateOfchange_df,cell_subsets = c("Mono_Classical"))
+```
