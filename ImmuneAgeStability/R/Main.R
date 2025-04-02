@@ -124,7 +124,7 @@ compute_signature_stability_rateofchange<-function(signature_name,signature){
 #'
 #' This function takes a gene symbol and a subject variance rate of change data frame 
 #' as input to subseting it for the specified gene. It then fits a linear regression
-#' estimating the intercept and slope of subject variance and a p-value of significane
+#' estimating the intercept and slope of subject variance and a p-value of significance
 #' for the fit. These coefficients are returned as an output
 #'
 #' @param x string of gene name
@@ -179,16 +179,25 @@ compute_signature_stability_slope<-function(signature_name,signature_gene_list){
 #' @param signature_stability_slope data frame of subject variance slope of rate of change
 #' @return radarplot
 plot_signature_stability_radar<-function(signature_stability_slope){
+  df<-bulk_VES_lm_results
   incr_decr_list<-list()
   for (ct in unique(signature_stability_slope$celltype)){
     sig<-unique(signature_stability_slope$signature)
-    decr<-sum(signature_stability_slope$window_number[((signature_stability_slope$celltype==ct)&(signature_stability_slope$p<=0.05))]<=0, na.rm = T)
+    if (ct!="bulk"){
+    decr<-sum(signature_stability_slope$window_number[((signature_stability_slope$celltype==ct)&(signature_stability_slope$p<=0.05))]<0, na.rm = T)
     incr<-sum(signature_stability_slope$window_number[((signature_stability_slope$celltype==ct)&(signature_stability_slope$p<=0.05))]>0, na.rm = T)
-    stab<-sum(abs(signature_stability_slope$p[(signature_stability_slope$celltype==ct)])>0.05, na.rm = T)
+    stab<-sum(abs(signature_stability_slope$p[(signature_stability_slope$celltype==ct)&(signature_stability_slope$`(Intercept)`>0.3)])>0.05, na.rm = T)
+    misc<-sum(abs(signature_stability_slope$p[(signature_stability_slope$celltype==ct)&(signature_stability_slope$`(Intercept)`<=0.3)])>0.05, na.rm = T)
+    } else {
+    decr<-sum(unique(signature_stability_slope$gene) %in% df$gene[(df$term=="window_number_demeaned")&(df$beta<0)&(df$pval<=0.05)], na.rm = T)
+    incr<-sum(unique(signature_stability_slope$gene) %in% df$gene[(df$term=="window_number_demeaned")&(df$beta>0)&(df$pval<=0.05)], na.rm = T)
+    stab<-sum(unique(signature_stability_slope$gene) %in% df$gene[(df$term=="intrcpt")&(df$beta>=0.3)], na.rm = T)
+    misc<-sum(unique(signature_stability_slope$gene) %in% df$gene[((df$term=="intrcpt")&(df$beta<0.3))|((df$term=="window_number_demeaned")&(abs(df$pval)>0.05))], na.rm = T)
+    }
     incr_decr_list[[ct]]<-c(decr,incr,stab)
   }
   df_incr_decr<-do.call(rbind,incr_decr_list)
-  colnames(df_incr_decr)<-c("decreasing","increasing","stable")
+  colnames(df_incr_decr)<-c("Decreasing VES","Increasing VES","Persistent VES")
   df_incr_decr<-as.data.frame(t(df_incr_decr))
   for (name in names(df_incr_decr)){df_incr_decr[[name]]<-df_incr_decr[[name]]/colSums(df_incr_decr)[[name]]}
   data <- rbind(rep(1,dim(df_incr_decr)[2]) , rep(0,dim(df_incr_decr)[2]) , df_incr_decr)
@@ -241,20 +250,30 @@ plot_signature_gene_agetrend<-function(signature_rateOfchange, cell_subsets){
 #' @return barplot
 plot_signature_stability_bars<-function(signature_stability_slope){
   incr_decr_list<-list()
+  df<-bulk_VES_lm_results
   for (ct in unique(signature_stability_slope$celltype)){
     sig<-unique(signature_stability_slope$signature)
-    decr<-sum(signature_stability_slope$window_number[((signature_stability_slope$celltype==ct)&(signature_stability_slope$p<=0.05))]<=0, na.rm = T)
+    if (ct!="bulk"){
+    decr<-sum(signature_stability_slope$window_number[((signature_stability_slope$celltype==ct)&(signature_stability_slope$p<=0.05))]<0, na.rm = T)
     incr<-sum(signature_stability_slope$window_number[((signature_stability_slope$celltype==ct)&(signature_stability_slope$p<=0.05))]>0, na.rm = T)
-    stab<-sum(abs(signature_stability_slope$p[(signature_stability_slope$celltype==ct)])>0.05, na.rm = T)
-    incr_decr_list[[ct]]<-c(decr,incr,stab)
+    stab<-sum(abs(signature_stability_slope$p[(signature_stability_slope$celltype==ct)&(signature_stability_slope$`(Intercept)`>0.3)])>0.05, na.rm = T)
+    misc<-sum(abs(signature_stability_slope$p[(signature_stability_slope$celltype==ct)&(signature_stability_slope$`(Intercept)`<=0.3)])>0.05, na.rm = T)
+    } else {
+    decr<-sum(unique(signature_stability_slope$gene) %in% df$gene[(df$term=="window_number_demeaned")&(df$beta<0)&(df$pval<=0.05)], na.rm = T)
+    incr<-sum(unique(signature_stability_slope$gene) %in% df$gene[(df$term=="window_number_demeaned")&(df$beta>0)&(df$pval<=0.05)], na.rm = T)
+    stab<-sum(unique(signature_stability_slope$gene) %in% df$gene[(df$term=="intrcpt")&(df$beta>=0.3)], na.rm = T)
+    misc<-sum(unique(signature_stability_slope$gene) %in% df$gene[((df$term=="intrcpt")&(df$beta<0.3))|((df$term=="window_number_demeaned")&(abs(df$pval)>0.05))], na.rm = T)
+    }
+    incr_decr_list[[ct]]<-c(decr,incr,stab,misc)
   }
   df_incr_decr<-do.call(rbind,incr_decr_list)
-  colnames(df_incr_decr)<-c("decreasing","increasing","stable")
+  colnames(df_incr_decr)<-c("Decreasing VES","Increasing VES","Persistent VES","misc")
   df_incr_decr<-as.data.frame(t(df_incr_decr))
   for (name in names(df_incr_decr)){df_incr_decr[[name]]<-df_incr_decr[[name]]/colSums(df_incr_decr)[[name]]}
+  df_incr_decr<-df_incr_decr[c("Persistent VES","Increasing VES","Decreasing VES"),]
   data <- df_incr_decr
   data$slope<-rownames(data)
   data<-melt(data, id.vars = "slope")
   colnames(data)<-c("slope","celltype","value")
-  ggplot(data=data,aes(x=value,y=celltype,fill=slope))+geom_bar(stat='identity')+xlab("% variance explained")+ggtitle(sig)
+  ggplot(data=data,aes(x=value,y=celltype,group=celltype,fill=slope))+geom_bar(stat='identity')+xlab("Fraction genes in signature")+ggtitle(sig)+scale_fill_viridis_d()+theme_classic()
 }
