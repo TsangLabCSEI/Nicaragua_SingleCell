@@ -12,6 +12,7 @@ library(tidyverse)
 var.threshold <- 1
 
 #initialize list to store normalized pseudobulk dta
+pseudobulk_list<-readRDS("NICA_batch2to4_new_timepoints_cleaned.rds")
 pseudobulk_list_normalized <- list()
 
 #iterate over raw pseudobulk pooled data and run normalization and batch correction

@@ -7,8 +7,8 @@ library(variancePartition)
 
 for (a in c("NICA_batch2to4_new_timepoints_cleaned_normalized")){
   print(a)
-  DGE.IN.PATH <- paste0("/pseudo_bulk/",a,".rds")
-  VAR.OUT.PATH <- paste0("/pseudo_bulk/",a,"_fsex_vpar.rds")
+  DGE.IN.PATH <- paste0(a,".rds")
+  VAR.OUT.PATH <- paste0(a,"_fsex_vpar.rds")
   
   # Output Paths ----------------------------------------------------
   FIT.OUT.PATH <- "/pseudo_bulk/limma_fit_no_subj_elspline_8knot_fit_fsex.rds"
