@@ -1,11 +1,11 @@
 library(Seurat)
 library(edgeR)
 library(tidyverse)
+source("pseudobulk_pooling_functions.R")
 
 
-
-
-DGELISTS_OUT_PATH <- "/pseudo_bulk/NICA_batch1to4_new.rds"
+dataset.all <- readRDS("NICAall_combined_manual_labeled_cleaned_final.rds")
+DGELISTS_OUT_PATH <- "NICA_batch2to4_new_timepoints_cleaned.rds"
 
 #Parameters for pseudobulk pooling
 LIBSIZE_FILTER <- 0
