@@ -18,13 +18,24 @@ library(stringr)
 
 ```{r}
 # load single cell seurat object
-dataset.query <- readRDS("/gpfs/gibbs/pi/csei/users/lb2336/sc_annotated_rds_objects/NICA_batch1to4_new_harmonized.rds")
+dataset.query <- readRDS("NICAall_combined_manual_labeled_cleaned_final.rds")
+prots<-rownames(dataset.query)[!(str_detect(rownames(dataset.query),"iso")|str_detect(rownames(dataset.query),"Iso"))]
+dataset.query <- dataset.query[prots,]
+dataset.query <- dataset.query[,dataset.query$manual.cid!="doublets"]
 ```
 
 ```{r}
 # vizualize UMAP
 Idents(dataset.query)<-dataset.query$manual.cid
-DimPlot(dataset.query.harmonized, reduction = "umap", group.by = "manual.cid", label = TRUE, repel = TRUE, raster=FALSE) + NoLegend()
+dataset.query <- FindVariableFeatures(dataset.query, selection.method = "vst", nfeatures = 2000)
+dataset.query <- ScaleData(dataset.query)#, vars.to.regress = "batch")
+dataset.query <- RunPCA(dataset.query, features = VariableFeatures(object = dataset.query))
+#dataset.query.harmonized <- dataset.query
+dataset.query.harmonized <- RunHarmony(dataset.query, "batch")
+dataset.query.harmonized <- FindNeighbors(dataset.query.harmonized, dims = 1:15, reduction="harmony", features=VariableFeatures(dataset.query.harmonized))
+dataset.query.harmonized <- FindClusters(dataset.query.harmonized, resolution = 1, features=VariableFeatures(dataset.query.harmonized))
+dataset.query.harmonized <- RunUMAP(dataset.query.harmonized, dims=1:15, reduction = "harmony") #batch3, n.neighbors = 5L, min.dist = 0.3 #batch4 dims=1:15 #all dims=1:15
+DimPlot(dataset.query.harmonized, reduction = "umap", group.by = "manual.cid", label = TRUE, repel = TRUE, raster=FALSE, label.size = 4, shuffle = TRUE)
 ```
 
 ```{r}
@@ -58,11 +69,12 @@ nica.celltypes$gender<-as.vector(t(data.frame(sapply(rownames(nica.celltypes),fu
 ```{r}
 #visualize distribution of timepoints per individual
 age_df<-nica.celltypes[c("individual","timepoint","gender")]
+age_df<-age_df[age_df$individual!="nica4416",]
 age_df<-age_df %>% group_by(individual,gender) %>% summarise_at(vars(timepoint),list(max = max, min=min))
 age_df<-as.data.frame(age_df)
 age_df$V3<-age_df$max - age_df$min
 age_df<-age_df[order(age_df$V3, decreasing = T),]
-age_df$idx<-seq(1,20)
+age_df$idx<-seq(1,15)
 age_df %>%
     ggplot(aes(x = idx, col=gender)) +
     geom_linerange(aes(ymin = min, ymax = max, x = idx),
@@ -71,6 +83,6 @@ age_df %>%
     geom_point(aes(y = max)) +
     coord_flip() +
     ylab("Followed age range") +
-    theme_bw(base_size = 16) +
-    theme(axis.title.y = element_blank()) + scale_y_continuous(breaks = seq(2,17,2))
+    theme_bw(base_size = 15) +
+    theme(axis.title.y = element_blank(), legend.position = c(0.8, 0.85), legend.background = element_rect(fill = NA)) + scale_y_continuous(breaks = seq(3,17,2))+ scale_x_continuous(breaks = seq(1,15,1)) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(), legend.title=element_text(size=14))
 ```
