@@ -31,11 +31,11 @@ https://zenodo.org/api/records/15151094
 -> **Example execution:**
 ```snakemake -j 16 --configfile config.yaml --use-singularity --executor slurm```
 
-### Figure 4B,C - Single Cell UMAP and Age Range of Individuals
+### Figure 3B,C - Single Cell UMAP and Age Range of Individuals
 -> **Data:** Download single cell RDS object from Zenodo: "NICAall_combined_manual_labeled_cleaned_final.rds" \
 -> **Code to run:** downstream_analysis/Individuals_and_UMAP.Rmd
 
-### Figure 4D - Age Trajectories
+### Figure 3D - Age Trajectories
 -> **Data:** bulk age trajectory gene sets from Zenodo: "supp_tables_S6.csv" \
 -> **Data:** bulk subject variance gene sets from Zenodo: "supp_tables_S10.csv" \
 -> **Data:** raw single cell variance partition results from Zenodo: "NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_spline.rds" \
@@ -43,6 +43,16 @@ https://zenodo.org/api/records/15151094
 -> **Data:** Download normalized pseudobulk RDS object from Zenodo: "NICA_batch2to4_new_timepoints_cleaned_normalized.rds" \
 -> **Data:** Download simplified age variance partition results: "/Users/leon/Documents/NICA/sc_analysis/data/NICA_batch2to4_new_timepoints_limma_fgsea_simplified_age_results.rds" \
 -> **Code to run:** downstream_analysis/Age_trends_and_enrichments.Rmd
+
+### Figure 3E,F,G,H - Variance Explained by Subject (VES) Heatmap and by Gene, Celltype and Signature
+-> **Data:** bulk subject variance explicit per gene from Zenodo: "supp_tables_S9.csv" \
+-> **Data:** bulk subject variance gene sets from Zenodo: "supp_tables_S10.csv" \
+-> **Data:** raw single cell variance partition results from Zenodo: "NICA_batch2to4_new_timepoints_fsex_subject_enriched_with_labels.rds" \
+-> **Data:** aggregated single cell variance partition results from Zenodo: "NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_vpars_object.rds" \
+-> **Data:** Highly Heritable Genes (Wright et al, 2014) from Zenodo: "inheritability_data_777.csv" \
+-> **Data:** Heritability Pvalue per Gene (Wright et al, 2014) from Zenodo: "inheritability_data_pvals.csv" \
+-> **Code to run:** downstream_analysis/VES_Heatmap.Rmd
+
 
 ### Raw data processing: Cellranger, Normalization, Demuxlet
 -> **Data:** Due to privacy concerns we did not make the raw data available \
