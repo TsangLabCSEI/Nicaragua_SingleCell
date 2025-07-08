@@ -37,7 +37,7 @@ https://zenodo.org/api/records/15151094
 -> **Code to run:** downstream_analysis/Age_trends_and_enrichments.Rmd
 
 ### Raw data processing: Cellranger, Normalization, Demuxlet
--> **Data:** Due to privacy concerns we did not make the raw data available
--> **Data:** HTO mapping of timepoints: "HTO_matching_table_new_cleaned.xlsx"
--> **Code to run:** Configurations how cellranger was run can be found here - singlecell_processing/example_cellranger.config
+-> **Data:** Due to privacy concerns we did not make the raw data available \
+-> **Data:** HTO mapping of timepoints: "HTO_matching_table_new_cleaned.xlsx" \
+-> **Code to run:** Configurations how cellranger was run can be found here - singlecell_processing/example_cellranger.config \
 -> **Code to run:** Example code how the cellranger output was normalized and annotated can be found here - singlecell_processing/sc_processing.R
