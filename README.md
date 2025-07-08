@@ -11,6 +11,8 @@ https://zenodo.org/api/records/15151094
 
 ## Data Analysis Instructions for Reproducibility
 
+Below are pointers to scripts to reproduce figures and respective pre-processing steps. Each analysis below the following captions can be reproduced independently based on provided intermediate results in the zenodo repository. Raw data processing can not be reproduced as we are unable to share this data, nevertheless we share the scripts how the analysis was carried out.
+
 ### Pre-processing: Pseudobulk Generation from Single Cell Data
 -> **Data:** Download single cell RDS object from Zenodo: "NICAall_combined_manual_labeled_cleaned_final.rds" \
 -> **Code to run:** pseudobulk_processing/export_pseudobulk.R
@@ -41,6 +43,10 @@ https://zenodo.org/api/records/15151094
 -> **Data:** Download celltype divided pseudobulk RDS objects from Zenodo: "pseudobulk_aging_cohort.zip" \
 -> **Prepare:** Extract celltype specific pseudobulk folder into /pseudobulk_aging_cohort \
 -> **Code to run:** pseudobulk_processing/normalize_and_batch_correct_pseudobulk_adult_old.R
+
+### Pre-processing: Subject Variance Partitioning of Adult Old Cohort (Terekhova et al, 2023)
+-> **Data:** Download normalized pseudobulk RDS object from Zenodo: "all_adult_pbulk_list_normalized.rds" \
+-> **Code to run:** pseudobulk_processing/fit_linear_models_pseudobulk_adult_old.R
 
 ### Figure 3B,C - Single Cell UMAP and Age Range of Individuals
 -> **Data:** Download single cell RDS object from Zenodo: "NICAall_combined_manual_labeled_cleaned_final.rds" \
