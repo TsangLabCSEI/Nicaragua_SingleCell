@@ -28,7 +28,8 @@ https://zenodo.org/api/records/15151094
 -> **Data:** Download singularity image from Zenodo: "intrinsicness_0.1.sif" \
 -> **Prepare:** Extract celltype specific pseudobulk folder into incr_decr_variance/data/processed/ \
 -> **Code to run:** incr_decr_variance/Snakefile \
--> **Example execution:** snakemake -j 16 --configfile config.yaml --use-singularity --executor slurm
+-> **Example execution:**
+```snakemake -j 16 --configfile config.yaml --use-singularity --executor slurm```
 
 ### Figure 4B,C - Single Cell UMAP and Age Range of Individuals
 -> **Data:** Download single cell RDS object from Zenodo: "NICAall_combined_manual_labeled_cleaned_final.rds" \
