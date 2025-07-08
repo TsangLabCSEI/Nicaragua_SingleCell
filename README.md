@@ -3,11 +3,13 @@ This repository contains notebooks to reproduce the single cell analysis of the 
 
 ![](analysis_overview.png)
 
-## Data Analysis Instructions for Reproducibility
+## Data Availability
 
-### Figure 4B,C - Single Cell UMAP and Age Range of Individuals
--> **Data:** Download single cell RDS object from Zenodo: "NICAall_combined_manual_labeled_cleaned_final.rds" \
--> **Code to run:** downstream_analysis/Individuals_and_UMAP.Rmd 
+Processed data files to reproduce the analysis are available on zenodo under: \
+Longitudinal blood transcriptomic profiling of Nicaraguan children reveals trajectories of pediatric immune development and individuality \
+https://zenodo.org/api/records/15151094
+
+## Data Analysis Instructions for Reproducibility
 
 ### Pre-processing: Pseudobulk Generation from Single Cell Data
 -> **Data:** Download single cell RDS object from Zenodo: "NICAall_combined_manual_labeled_cleaned_final.rds" \
@@ -21,6 +23,10 @@ This repository contains notebooks to reproduce the single cell analysis of the 
 -> **Data:** Download normalized pseudobulk RDS object from Zenodo: "NICA_batch2to4_new_timepoints_cleaned_normalized.rds" \
 -> **Code to run:** pseudobulk_processing/fit_linear_models_pseudobulk.Rmd
 
+### Figure 4B,C - Single Cell UMAP and Age Range of Individuals
+-> **Data:** Download single cell RDS object from Zenodo: "NICAall_combined_manual_labeled_cleaned_final.rds" \
+-> **Code to run:** downstream_analysis/Individuals_and_UMAP.Rmd
+
 ### Figure 4D - Age Trajectories
 -> **Data:** bulk age trajectory gene sets from Zenodo: "supp_tables_S6.csv" \
 -> **Data:** bulk subject variance gene sets from Zenodo: "supp_tables_S10.csv" \
@@ -30,4 +36,8 @@ This repository contains notebooks to reproduce the single cell analysis of the 
 -> **Data:** Download simplified age variance partition results: "/Users/leon/Documents/NICA/sc_analysis/data/NICA_batch2to4_new_timepoints_limma_fgsea_simplified_age_results.rds" \
 -> **Code to run:** downstream_analysis/Age_trends_and_enrichments.Rmd
 
-
+### Raw data processing: Cellranger, Normalization, Demuxlet
+-> **Data:** Due to privacy concerns we did not make the raw data available
+-> **Data:** HTO mapping of timepoints: "HTO_matching_table_new_cleaned.xlsx"
+-> **Code to run:** Configurations how cellranger was run can be found here - singlecell_processing/example_cellranger.config
+-> **Code to run:** Example code how the cellranger output was normalized and annotated can be found here - singlecell_processing/sc_processing.R
