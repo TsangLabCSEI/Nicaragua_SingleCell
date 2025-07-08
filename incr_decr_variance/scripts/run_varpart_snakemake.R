@@ -18,6 +18,10 @@ DGE.IN.PATH <- snakemake@input[[1]]
 VARPART.OUT.PATH <- snakemake@output[[1]]
 META.OUT.PATH <- snakemake@output[[2]]
 SUBJ.OUT.PATH <- snakemake@output[[3]]
+dir.create(dirname(VARPART.OUT.PATH), recursive = TRUE)
+dir.create(dirname(META.OUT.PATH), recursive = TRUE)
+dir.create(dirname(SUBJ.OUT.PATH), recursive = TRUE)
+
 
 # Read in data ----------------------------------------------------
 dge <- readRDS(DGE.IN.PATH)
@@ -26,7 +30,7 @@ boot <- snakemake@params[["boot"]]
 set.seed(boot)
 
 #new stuff added
-n_subj_keep <- round(length(unique(dge$samples$matched.individual)) * .8)
+n_subj_keep <- 10 #round(length(unique(dge$samples$matched.individual)) * .8)
 keep_subj <- sample(as.character(dge$samples$matched.individual), size = n_subj_keep)
 dge <- dge[, as.character(dge$samples$matched.individual) %in% as.character(keep_subj)]
 

@@ -1,11 +1,11 @@
+configfile: "config.yaml"
 singularity: "file:///gpfs/gibbs/pi/csei/users/lb2336/incr_decr_svariance/singularity/intrinsicness_0.1.sif" 
 
-CELLTYPES = ["B_Mem","B_Naive","CD4_Mem","CD4_Naive","CD8_Mem","CD8_Naive","cDC","gdT_Vd1","gdT_Vd2","MAIT","Mono_Classical","Mono_NonClassical","NK_CD16hi","NK_CD56hi","pDC"]
+CELLTYPES = ["B_Mem","B_Naive","CD4_Mem","CD4_Naive","CD8_Mem","CD8_Naive","gdT_Vd1","gdT_Vd2","MAIT","Mono_Classical","Mono_NonClassical","NK_CD16hi","pDC"] 
 
 
 rule all:    
     input:
-        expand("data/analysis_out/variancePartition/age_sliding_window_bootstrap_regress_cells/gls_model_v3_include_nsubj/fgsea/slope_{celltype}.tsv", celltype=CELLTYPES),
         expand("data/analysis_out/variancePartition/age_sliding_window_bootstrap_regress_cells/gls_model_v3_include_nsubj/bootstrap_summary_dat_list_{celltype}.rds", celltype=CELLTYPES)
 
 ## processsing -------------------------------------------------------
@@ -15,26 +15,31 @@ rule all:
 WINDOWS = []
 AGE_GROUPS = [1,2,3]
 
-for i in range(1,12):
-    WINDOWS.append(str(i) + "to" + str(i + 3))
+# [3,9] + 6
 
-BOOT_ITER = range(0,100)
+for i in range(2,3):
+    WINDOWS.append(str(i) + "to" + str(i + 5))
+
+BOOT_ITER = range(0,10) 
 
 rule make_window_subsets_rm_cells:
     input:
-        expand("data/processed/NICA_batch1to4_new_normalized_{celltype}.rds", celltype=CELLTYPES) ### not sure what is this
+        "data/processed/NICA_batch2to4_new_normalized_{celltype}.rds", #celltype=CELLTYPES) ### not sure what is this
     output:
-        expand("data/analysis_out/variancePartition/sliding_age_window/subsetted_vst_ctrl_cells_{celltype}/age_{window}_vst.rds", window = WINDOWS, celltype=CELLTYPES)
+        "data/analysis_out/variancePartition/sliding_age_window/subsetted_vst_ctrl_cells_{celltype}/age_{window}_vst.rds", #window = WINDOWS, celltype=CELLTYPES)
+    params:
+        celltype = lambda wildcards: wildcards.celltype,
+        window = lambda wildcards: wildcards.window
     script:
         "scripts/subset_data_ctrl_cells.R"
 
 rule run_varpart_window_jacknife:
     input:
-        expand("data/analysis_out/variancePartition/sliding_age_window/subsetted_vst_ctrl_cells_{celltype}/age_{window}_vst.rds", window = WINDOWS, boot=BOOT_ITER, celltype=CELLTYPES)
+        "data/analysis_out/variancePartition/sliding_age_window/subsetted_vst_ctrl_cells_{celltype}/age_{window}_vst.rds", # window = WINDOWS, celltype=CELLTYPES)
     output:
-        "data/analysis_out/variancePartition/age_sliding_window_bootstrap/varpart_objects/window_{window}_{celltype}_{boot}_varpart.rds",
-        "data/analysis_out/variancePartition/age_sliding_window_bootstrap/metadata_subsets/window_{window}_{celltype}_{boot}_meta.tsv",
-        "data/analysis_out/variancePartition/age_sliding_window_bootstrap/subject_boots/window_{window}_{celltype}_{boot}_subjects.txt"
+        "data/analysis_out/variancePartition/age_sliding_window_bootstrap/varpart_objects/window_{window}_celltype-{celltype}_boot-{boot}_varpart.rds",
+        "data/analysis_out/variancePartition/age_sliding_window_bootstrap/metadata_subsets/window_{window}_celltype-{celltype}_boot-{boot}_meta.tsv",
+        "data/analysis_out/variancePartition/age_sliding_window_bootstrap/subject_boots/window_{window}_celltype-{celltype}_boot-{boot}_subjects.txt"
     params:
         celltype = lambda wildcards: wildcards.celltype,
         window = lambda wildcards: wildcards.window,
@@ -44,7 +49,7 @@ rule run_varpart_window_jacknife:
 
 rule metafor_metaanalysis_v3_regress_cells:
     input:
-        expand("data/analysis_out/variancePartition/age_sliding_window_bootstrap/varpart_objects/window_{window}_{celltype}_{boot}_varpart.rds", window=WINDOWS, boot=BOOT_ITER, celltype=CELLTYPES),
+        expand("data/analysis_out/variancePartition/age_sliding_window_bootstrap/varpart_objects/window_{window}_celltype-{celltype}_boot-{boot}_varpart.rds", window=WINDOWS, boot=BOOT_ITER, celltype= lambda wildcards: wildcards.celltype),
     output:
         "data/analysis_out/variancePartition/age_sliding_window_bootstrap_regress_cells/gls_model_v3_include_nsubj/bootstrap_summary_dat_list_{celltype}.rds",
         "data/analysis_out/variancePartition/age_sliding_window_bootstrap_regress_cells/gls_model_v3_include_nsubj/results_dat_list_with_intercept_{celltype}.rds"
@@ -53,13 +58,3 @@ rule metafor_metaanalysis_v3_regress_cells:
     script:
         "scripts/metafor_metaanalysis_v3_regress_cells.R"
 
-rule sliding_window_fgsea_regress_cells:
-    input:
-        expand("data/analysis_out/variancePartition/age_sliding_window_bootstrap_regress_cells/gls_model_v3_include_nsubj/results_dat_list_with_intercept_{celltype}.rds", celltype=CELLTYPES),
-        COMBINED_GENESETS_IN_PATH="data/combined_gene_sets.RDS"
-    output:
-        "data/analysis_out/variancePartition/age_sliding_window_bootstrap_regress_cells/gls_model_v3_include_nsubj/fgsea/slope_{celltype}.tsv"
-    params:
-        celltype = lambda wildcards: wildcards.celltype,
-    script:
-        "scripts/run_fgsea_v3_regress_cells.R"

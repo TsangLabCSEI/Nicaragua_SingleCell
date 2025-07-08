@@ -1,6 +1,5 @@
 library(tidyverse)
 library(dplyr)
-library(stringr)
 library(metafor)
 library(SummarizedExperiment)
 
@@ -12,8 +11,7 @@ CELLTYPE <- snakemake@params[["celltype"]]
 
 IN_DIR <- "data/analysis_out/variancePartition/age_sliding_window_bootstrap/varpart_objects/"
 
-files <- list.files(IN_DIR, full.names = TRUE)
-files <- files[str_detect(files,CELLTYPE)]
+files <- list.files(IN_DIR, full.names = TRUE, pattern=CELLTYPE)
 
 # META_DIR <- "data/analysis_out/variancePartition/age_sliding_window/metadata_subsets/"
 # 
@@ -53,7 +51,7 @@ combined_jacc_mat <- (subj_jacc_mat + samp_jacc_mat) / 2
 
 
 vp_objs <- lapply(files, readRDS)
-id <- sapply(strsplit(basename(files), "_"), function(x) paste(x[2:3], collapse = "_"))
+id <- sapply(strsplit(basename(files), "_"), function(x) paste(x[2:5], collapse = "_"))
 names(vp_objs) <- id
 
 dat <- lapply(vp_objs, function(vp){
@@ -65,8 +63,9 @@ dat <- lapply(vp_objs, function(vp){
 #         separate(id, into =c("window", "boot_iter"), sep = "_")
 
 id_split <- strsplit(dat$id, "_")
-
 dat$window <- sapply(id_split, `[[`, 1)
+
+id_split <- strsplit(dat$id, "boot-")
 dat$boot_iter <- sapply(id_split, `[[`, 2)
 
 dat <- dat %>%
