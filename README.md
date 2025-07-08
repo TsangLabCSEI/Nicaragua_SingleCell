@@ -23,6 +23,13 @@ https://zenodo.org/api/records/15151094
 -> **Data:** Download normalized pseudobulk RDS object from Zenodo: "NICA_batch2to4_new_timepoints_cleaned_normalized.rds" \
 -> **Code to run:** pseudobulk_processing/fit_linear_models_pseudobulk.Rmd
 
+### Pre-processing: Increasing and Decreasing Subject Individuality
+-> **Data:** Download celltype divided pseudobulk RDS objects from Zenodo: "pseudobulk_per_celltype.zip" \
+-> **Data:** Download singularity image from Zenodo: "intrinsicness_0.1.sif" \
+-> **Prepare:** Extract celltype specific pseudobulk folder into incr_decr_variance/data/processed/ \
+-> **Code to run:** incr_decr_variance/Snakefile
+-> **Example execution:** snakemake -j 16 --configfile config.yaml --use-singularity --executor slurm
+
 ### Figure 4B,C - Single Cell UMAP and Age Range of Individuals
 -> **Data:** Download single cell RDS object from Zenodo: "NICAall_combined_manual_labeled_cleaned_final.rds" \
 -> **Code to run:** downstream_analysis/Individuals_and_UMAP.Rmd
