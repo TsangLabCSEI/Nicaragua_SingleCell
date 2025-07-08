@@ -31,6 +31,12 @@ https://zenodo.org/api/records/15151094
 -> **Example execution:**
 ```snakemake -j 16 --configfile config.yaml --use-singularity --executor slurm```
 
+### Pre-processing: Subject Variance Partitioning in Adult Old Cohort (Terekhova et al, 2023)
+-> **Data:** Download public data set from synapse.org (syn49637038): "all_pbmcs_rna_harmony.h5ad" \
+-> **Data:** Download public data set from synapse.org (syn49637038): "pbmc_gex_raw_with_var_obs.h5ad" \
+-> **Data:** Download bootstrapped donor list from Zenodo: "age_subject_variance_donors_adult_old_aging_cohort.RDS" \
+-> **Code to run:** pseudobulk_processing/export_pseudobulk_adult_old_cohort.R
+
 ### Figure 3B,C - Single Cell UMAP and Age Range of Individuals
 -> **Data:** Download single cell RDS object from Zenodo: "NICAall_combined_manual_labeled_cleaned_final.rds" \
 -> **Code to run:** downstream_analysis/Individuals_and_UMAP.Rmd
@@ -51,7 +57,10 @@ https://zenodo.org/api/records/15151094
 -> **Data:** aggregated single cell variance partition results from Zenodo: "NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_vpars_object.rds" \
 -> **Data:** Highly Heritable Genes (Wright et al, 2014) from Zenodo: "inheritability_data_777.csv" \
 -> **Data:** Heritability Pvalue per Gene (Wright et al, 2014) from Zenodo: "inheritability_data_pvals.csv" \
+-> **Install:** Rpackage - Nicaragua_SingleCell/ImmuneAgeStability/ \
 -> **Code to run:** downstream_analysis/VES_Heatmap.Rmd
+
+### Figure 4A - VES correlation Adult, Old
 
 
 ### Raw data processing: Cellranger, Normalization, Demuxlet
