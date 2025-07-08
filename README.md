@@ -53,25 +53,30 @@ Below are pointers to scripts to reproduce figures and respective pre-processing
 -> **Code to run:** downstream_analysis/Individuals_and_UMAP.Rmd
 
 ### Figure 3D - Age Trajectories
--> **Data:** bulk age trajectory gene sets from Zenodo: "supp_tables_S6.csv" \
--> **Data:** bulk subject variance gene sets from Zenodo: "supp_tables_S10.csv" \
--> **Data:** raw single cell variance partition results from Zenodo: "NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_spline.rds" \
--> **Data:** aggregated single cell variance partition results from Zenodo: "NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_vpars_object.rds" \
+-> **Data:** Download bulk age trajectory gene sets from Zenodo: "supp_tables_S6.csv" \
+-> **Data:** Download bulk subject variance gene sets from Zenodo: "supp_tables_S10.csv" \
+-> **Data:** Download raw single cell variance partition results from Zenodo: "NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_spline.rds" \
+-> **Data:** Download aggregated single cell variance partition results from Zenodo: "NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_vpars_object.rds" \
 -> **Data:** Download normalized pseudobulk RDS object from Zenodo: "NICA_batch2to4_new_timepoints_cleaned_normalized.rds" \
 -> **Data:** Download simplified age variance partition results: "/Users/leon/Documents/NICA/sc_analysis/data/NICA_batch2to4_new_timepoints_limma_fgsea_simplified_age_results.rds" \
 -> **Code to run:** downstream_analysis/Age_trends_and_enrichments.Rmd
 
 ### Figure 3E,F,G,H - Variance Explained by Subject (VES) Heatmap and by Gene, Celltype and Signature
--> **Data:** bulk subject variance explicit per gene from Zenodo: "supp_tables_S9.csv" \
--> **Data:** bulk subject variance gene sets from Zenodo: "supp_tables_S10.csv" \
--> **Data:** raw single cell variance partition results from Zenodo: "NICA_batch2to4_new_timepoints_fsex_subject_enriched_with_labels.rds" \
--> **Data:** aggregated single cell variance partition results from Zenodo: "NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_vpars_object.rds" \
--> **Data:** Highly Heritable Genes (Wright et al, 2014) from Zenodo: "inheritability_data_777.csv" \
--> **Data:** Heritability Pvalue per Gene (Wright et al, 2014) from Zenodo: "inheritability_data_pvals.csv" \
+-> **Data:** Download bulk subject variance explicit per gene from Zenodo: "supp_tables_S9.csv" \
+-> **Data:** Download bulk subject variance gene sets from Zenodo: "supp_tables_S10.csv" \
+-> **Data:** Download raw single cell variance partition results from Zenodo: "NICA_batch2to4_new_timepoints_fsex_subject_enriched_with_labels.rds" \
+-> **Data:** Download aggregated single cell variance partition results from Zenodo: "NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_vpars_object.rds" \
+-> **Data:** Download Highly Heritable Genes (Wright et al, 2014) from Zenodo: "inheritability_data_777.csv" \
+-> **Data:** Download Heritability Pvalue per Gene (Wright et al, 2014) from Zenodo: "inheritability_data_pvals.csv" \
 -> **Install:** Rpackage - Nicaragua_SingleCell/ImmuneAgeStability/ \
 -> **Code to run:** downstream_analysis/VES_Heatmap.Rmd
 
 ### Figure 4A - VES correlation Adult, Old
+-> **Data:** Download celltype-specific subject variance of aging cohort from zenodo: "age_subject_variance_VESlist_adult_old_aging_cohort.RDS" \
+-> **Data:** Download ultra-stable gene list from zenodo: "age_subject_variance_ultrastab.RDS" \
+-> **Data:** Download aggregated pediatric variance partition results from Zenodo: "NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_vpars_object.rds" \
+-> **Data:** Download aggregated pediatric and aging cohort variance partition results from Zenodo: "age_subject_variance_young_adult_old.RDS" \
+-> **Code to run:** downstream_analysis/AdultOldCorrelations_new.Rmd
 
 
 ### Raw data processing: Cellranger, Normalization, Demuxlet
