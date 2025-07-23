@@ -254,6 +254,7 @@ ggplot(df[df$individual!="nica4416",],aes(x=age,y=expression,color=individual))+
 ```{r}
 fgsea_list<-readRDS("/Users/leon/Documents/NICA/sc_analysis/data/NICA_batch2to4_new_timepoints_limma_fgsea_simplified_age_results.rds")
 fgsea_dat <- bind_rows(fgsea_list, .id = "celltype")
+fgsea_dat$nlog_pval <- -log10(fgsea_dat$padj)
 
 mean_abs_nes_dat <- fgsea_dat %>%
   group_by(pathway) %>%
@@ -261,6 +262,39 @@ mean_abs_nes_dat <- fgsea_dat %>%
   mutate(mean_abs_nes_rank_up = rank(mean_abs_nes)) %>%
   mutate(mean_abs_nes_rank_dn = rank(-mean_abs_nes))
 
+
+keep_pathways <- c(
+  "reactome_Costimulation by the CD28 family",                #CD8_Mem / CD4_Mem                  2  
+  "btm_S0_T cell surface signature",                          #CD4_Mem                            4
+  "btm_M4.5_mitotic cell cycle in stimulated CD4 T cells",    #CD4_Mem
+  "btm_M4.1_cell cycle (I)",                                  #CD8_Mem / CD4_Mem / NK_CD16hi
+  "HALLMARK_G2M_CHECKPOINT",                                  #CD8_Mem / CD4_Mem / NK_CD16hi
+  "btm_M4.0_cell cycle and transcription",                    #CD8_Naive / gdT_Vd1 / NK_CD16hi
+  "btm_M16_TLR and inflammatory signaling",                   #CD8_Naive / Mono_Classic           1
+  "KEGG_ANTIGEN_PROCESSING_AND_PRESENTATION",
+  "reactome_Signaling by the B Cell Receptor (BCR)",
+  "reactome_Fcgamma receptor (FCGR) dependent phagocytosis", 
+  "reactome_Fc epsilon receptor (FCERI) signaling", 
+  "reactome_FCERI mediated NF-kB activation"                  #B_Mem / B_Naive                    3
+  #M4.2
+  #btm_M46
+  #"btm_M103_cell cycle (III)",                                #CD8_Mem / CD4_Mem / NK_CD16hi
+)
+
+fgsea_dat %>% filter(pathway %in% keep_pathways) %>%
+    mutate(pathway = factor(pathway, levels = keep_pathways)) %>%
+    ggplot(aes(x = celltype, y = pathway)) +
+    geom_point(aes(size = -log10(padj), color = NES, shape = padj < .05)) +
+    scale_color_viridis_c() +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+    ggtitle("Selected genesets that change with age - celltype specific") +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+
+```
+
+```{r}
+pbulk <- dge
 
 #Bcells
 keep_bcell_pathways <- c(
@@ -401,6 +435,36 @@ ggplot(mono_ifn_plot_dat, aes(x = matched.timepoint.age, y = zscore_log_cpm)) +
   scale_color_viridis_d(option = "mako") +
   ggtitle("Corticosteroid response genes in CD4 Memory cells") +
   coord_cartesian(ylim = c(-1, 1), xlim = c(3, 14))+theme(legend.position = "none")
+
+#Cell cycle pathways in CD8_Naive
+keep_cc_pathways <- unique(fgsea_dat[str_detect(fgsea_dat$pathway,"btm_M4.0"),]$pathway)
+keep_nk_pathways_cc <- which(fgsea_dat$celltype == "CD8_Naive" & fgsea_dat$pathway %in% keep_cc_pathways)
+
+keep_cc_genes <- unique(unlist(fgsea_dat$leadingEdge[keep_nk_pathways_cc]))
+
+nk_cc_cpm <- edgeR::cpm(pbulk$CD8_Naive, log = TRUE)
+nk_cc_plot_dat <- nk_cc_cpm[keep_cc_genes, ] %>%
+  t %>% scale %>% t %>%
+  as.data.frame() %>%
+  rownames_to_column("gene") %>%
+  gather(key = "Sample", value = "zscore_log_cpm", -gene) %>%
+  left_join(pbulk$CD8_Naive$samples %>%  rownames_to_column("Sample"))
+
+ggplot(nk_cc_plot_dat, aes(x = matched.timepoint.age, y = zscore_log_cpm)) +
+  geom_line(stat="smooth", formula = y ~ x,
+            size = 1,
+            #linetype ="dashed",
+            aes(color = gene),
+            alpha = 0.5) +
+  #theme_bw() +
+  theme_classic() +
+  geom_smooth(col = "black", lwd = 1.5) +
+  scale_x_continuous(breaks = c(3, 5, 7, 9, 11, 13)) +
+  xlab("Age (Years)") +
+  ylab("Scaled Expression") +
+  scale_color_viridis_d(option = "mako") +
+  ggtitle("Cell cycle and transcription genes in CD8_Naive") +
+  coord_cartesian(ylim = c(-1, 1), xlim = c(3, 14))
 
 ```
 
