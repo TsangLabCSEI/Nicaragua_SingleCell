@@ -1,0 +1,29 @@
+name: nicaragua
+channels:
+  - conda-forge
+  - bioconda
+  - anaconda
+  - defaults
+  - r
+dependencies:
+  - r-base=4.3.2
+  - conda-forge::r-seurat=5.0.1
+  - conda-forge::r-pheatmap=1.0.12
+  - conda-forge::r-stringr=1.5.1
+  - conda-forge::r-patchwork=1.2.0
+  - conda-forge::r-RColorBrewer>=1.1
+  - conda-forge::r-ggplot2=3.5.1
+  - conda-forge::r-matrixStats=1.2.0
+  - bioconda::bioconductor-fgsea=1.28.0
+  - bioconda::bioconductor-edgeR=4.0.16
+  - conda-forge::r-reshape2=1.4.4
+  - conda-forge::r-broom=1.0.5
+  - bioconda::bioconductor-ComplexHeatmap=2.18.0
+  - conda-forge::r-dplyr=1.1.4
+  - bioconda::bioconductor-limma=3.58.1
+  - r-lspline=1.0
+  - conda-forge::r-purrr=1.0.2
+  - bioconda::bioconductor-variancePartition=1.32.2
+  - conda-forge::r-vioplot=0.5.1
+  - r-fmsb=0.7.6
+  - conda-forge::r-multcomp=1.4_28
