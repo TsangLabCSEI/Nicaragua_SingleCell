@@ -68,7 +68,7 @@ Below are pointers to scripts to reproduce figures and respective pre-processing
 -> **Data:** Download aggregated single cell variance partition results from Zenodo: "NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_vpars_object.rds" \
 -> **Data:** Download Highly Heritable Genes (Wright et al, 2014) from Zenodo: "inheritability_data_777.csv" \
 -> **Data:** Download Heritability Pvalue per Gene (Wright et al, 2014) from Zenodo: "inheritability_data_pvals.csv" \
--> **Install:** Rpackage - Nicaragua_SingleCell/ImmuneAgeStability/ \
+-> **Install:** ```install.packages("Nicaragua_SingleCell/ImmuneAgeStability", repos = NULL, type="source")``` \
 -> **Code to run:** downstream_analysis/VES_Heatmap.Rmd
 
 ### Figure 4A - VES correlation Adult, Old

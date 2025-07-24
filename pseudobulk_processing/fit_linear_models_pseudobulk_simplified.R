@@ -29,19 +29,6 @@ toptab_list <- lapply(fit_list, function(fit){
     rownames_to_column("gene")
 })
 
-lapply(toptab_list, function(dat){
-  dat %>% filter(adj.P.Val < .05) %>%
-    pull(t) %>%
-    sign() %>%
-    table()
-})
-
-toptab_list[[1]] %>%
-  filter(AveExpr > 10)
-
-toptab_list[[2]] %>%
-  filter(AveExpr > 10)
-
 geneset.list <- readRDS("combined_gene_sets.RDS")
 
 fgsea_list <- lapply(toptab_list, function(toptab){
