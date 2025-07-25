@@ -17,6 +17,12 @@ Below are pointers to scripts to reproduce figures and respective pre-processing
 To reproduce the analysis conda environment can be created from one of the yml files in the environment folder or the following singularity container available on https://cloud.sylabs.io/ can be used: \
 ```library://leon.bichmann/nicaragua/nicaragua:latest```
 
+In the case of choosing one of the provided conda environments, also install the local Rpackage ImmuneAgeStability:
+```install.packages("Nicaragua_SingleCell/ImmuneAgeStability", repos = NULL, type="source")``` \
+
+### ImmuneAgeStability Rpackage
+This Rpackage provides a way to reproduce some of the analysis carried out in our study as described in the scripts below. In addition it also enables users to assess any of their own gene expression signatures for aspects of temporal stabilty during childhood. 
+
 ### Pre-processing: Pseudobulk Generation from Single Cell Data
 -> **Data:** Download single cell RDS object from Zenodo: "NICAall_combined_manual_labeled_cleaned_final.rds" \
 -> **Code to run:** pseudobulk_processing/export_pseudobulk.R
@@ -34,7 +40,7 @@ To reproduce the analysis conda environment can be created from one of the yml f
 -> **Data:** Download singularity image from Zenodo: "intrinsicness_0.1.sif" \
 -> **Prepare:** Extract celltype specific pseudobulk folder into incr_decr_variance/data/processed/ \
 -> **Code to run:** incr_decr_variance/Snakefile \
--> **Example execution:**
+-> **Example execution:** \
 ```snakemake -j 16 --configfile config.yaml --use-singularity --executor slurm```
 
 ### Pre-processing: Pseudobulk Generation in Adult Old Cohort (Terekhova et al, 2023)
@@ -72,7 +78,6 @@ To reproduce the analysis conda environment can be created from one of the yml f
 -> **Data:** Download aggregated single cell variance partition results from Zenodo: "NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_vpars_object.rds" \
 -> **Data:** Download Highly Heritable Genes (Wright et al, 2014) from Zenodo: "inheritability_data_777.csv" \
 -> **Data:** Download Heritability Pvalue per Gene (Wright et al, 2014) from Zenodo: "inheritability_data_pvals.csv" \
--> **Install:** ```install.packages("Nicaragua_SingleCell/ImmuneAgeStability", repos = NULL, type="source")``` \
 -> **Code to run:** downstream_analysis/VES_Heatmap.Rmd
 
 ### Figure 4A - VES correlation Adult, Old
