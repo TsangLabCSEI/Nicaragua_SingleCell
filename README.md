@@ -13,6 +13,10 @@ https://zenodo.org/api/records/15151094
 
 Below are pointers to scripts to reproduce figures and respective pre-processing steps. Each analysis below the following captions can be reproduced independently based on provided intermediate results in the zenodo repository. Raw data processing can not be reproduced as we are unable to share this data, nevertheless we share the scripts how the analysis was carried out.
 
+### Environment and Container
+To reproduce the analysis conda environment can be created from one of the yml files in the environment folder or the following singularity container available on https://cloud.sylabs.io/ can be used: \
+```library://leon.bichmann/nicaragua/nicaragua:latest```
+
 ### Pre-processing: Pseudobulk Generation from Single Cell Data
 -> **Data:** Download single cell RDS object from Zenodo: "NICAall_combined_manual_labeled_cleaned_final.rds" \
 -> **Code to run:** pseudobulk_processing/export_pseudobulk.R
