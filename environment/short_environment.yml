@@ -27,3 +27,5 @@ dependencies:
   - conda-forge::r-vioplot=0.5.1
   - r-fmsb=0.7.6
   - conda-forge::r-multcomp=1.4_28
+  - conda-forge::r-colorramps=2.3.4
+  - conda-forge::r-viridis=0.6.5
