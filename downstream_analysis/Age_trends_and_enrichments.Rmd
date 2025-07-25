@@ -11,6 +11,9 @@ library(fgsea)
 library(edgeR)
 library(reshape2) 
 library(broom)
+library(stringr)
+library(dplyr)
+library(tidyr)
 ```
 
 
@@ -196,6 +199,7 @@ for (ct in unique(data3$celltype)){
         print(ct)
     }
 }
+
 ```
 
 ```{r}
@@ -252,7 +256,7 @@ ggplot(df[df$individual!="nica4416",],aes(x=age,y=expression,color=individual))+
 ```
 
 ```{r}
-fgsea_list<-readRDS("/Users/leon/Documents/NICA/sc_analysis/data/NICA_batch2to4_new_timepoints_limma_fgsea_simplified_age_results.rds")
+fgsea_list<-readRDS("/gpfs/gibbs/pi/csei/users/lb2336/pseudo_bulk/NICA_batch2to4_new_timepoints_limma_fgsea_simplified_age_results.rds")
 fgsea_dat <- bind_rows(fgsea_list, .id = "celltype")
 fgsea_dat$nlog_pval <- -log10(fgsea_dat$padj)
 
