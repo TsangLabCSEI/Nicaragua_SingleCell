@@ -13,7 +13,8 @@ library(Seurat)
 library(pheatmap)
 library(stringr)
 library(patchwork)
-
+library(viridis)
+library(colorRamp2)
 
 # load data
 nrchd_gene_df<-read.csv("/Users/leon/Documents/NICA/sc_analysis/data/supp_tables_S10.csv") # bulk rna enriched genesets
@@ -26,6 +27,9 @@ inh<-read.csv("/Users/leon/Documents/NICA/sc_analysis/data/inheritability_data_p
 inh777<-read.csv("/Users/leon/Documents/NICA/sc_analysis/data/inheritability_data_777.csv")
 inh777<-inh777$X
 inh777<-inh[which(inh$probe.id %in% inh777),]$gene.symbol
+inh_grouped<-inh %>% group_by(gene.symbol) %>% summarize(h2_max=max(h2))
+inh_grouped <- as.data.frame(inh_grouped)
+rownames(inh_grouped) <- inh_grouped$gene.symbol
 ```
 
 ```{r}
@@ -75,34 +79,92 @@ for (p in names(ledge_list)){
       p_annot<-as.numeric(rownames(vpars_h) %in% ledge_list[["M47.0_enriched in B cells (I)"]] | rownames(vpars_h) %in% ledge_list[["M47.2_enriched in B cells (III)"]] | rownames(vpars_h) %in% ledge_list[["M69_enriched in B cells (VI)"]])
       p="M47_M47.2_M69_enriched in B cells (I/III/VI)"
     }
-    if(p=="M5.0_regulation of antigen presentation and immune response"){
-      p<-"M5.0_regulation of antigen presentation & immune response        "
+    if(str_detect(p,"M2.0") | str_detect(p,"M2.1")){
+      p_annot<-as.numeric(rownames(vpars_h) %in% ledge_list[["M2.0_extracellular matrix (I)"]] | rownames(vpars_h) %in% ledge_list[["M2.1_extracellular matrix (II)"]])
+      p="M2.0_M2.1_extracellular matrix (I/II)"
     }
 
     p_annot_l[[p]]<-p_annot
 }
 p_annot_l<-as.data.frame(do.call(cbind,p_annot_l))
 rownames(p_annot_l)<-rownames(vpars_h)
-p_annot_l<-p_annot_l[!str_detect(colnames(p_annot_l),"extracell")]
-p_annot_l<-p_annot_l[!str_detect(colnames(p_annot_l),"cell cycle")]
-p_annot_l<-p_annot_l[!str_detect(colnames(p_annot_l),"regulation in cell")]
 
 #inheritable gens
 p_annot<-as.numeric(rownames(vpars_h) %in% inh777)
 p_annot_l$"HERITABILITY (Wright et al.,Nature Genetics 2014)"<-p_annot
+p_annot_l$"HERITABILITY (continuous h2 value)"<-inh_grouped[rownames(p_annot_l),]$h2_max #
 
 #clusterID
 p<-pheatmap(t(vpars_h), scale="none", clustering_distance_cols="correlation", cutree_cols = 4, silent = T)
 
-#subjectVar bulk RNA
-p_annot_l$VES_bulk<-bulk_subj_var_gene_df[rownames(p_annot_l),]$Subject.ID
-
-# plot heatmap
-p_annot_l$clusterid<-NULL
-pheatmap(t(vpars_h), scale="none", main="all", fontsize_row=12, fontsize=8, fontsize_col = 1, legend = TRUE, annotation_legend = FALSE ,annotation_col=p_annot_l, clustering_distance_cols="correlation", cutree_cols = 4, color=magma(100))
+# cut heatmap tree
+p_annot_l$clusterid<-cutree(p$tree_col, k = 4)
 ```
 
+```{r}
+library(ComplexHeatmap)
 
+col_fun = colorRamp2(c(-0.5, 0, 1), c("blue", "#EBEBEB", "red"))
+col_fun1 = colorRamp2(c(-0.5, 0, 1), c("black", "#EBEBEB", "red"))
+col_fun2 = colorRamp2(c(-0.5, 0, 1), c("black", "#EBEBEB", "green"))
+col_fun3 = colorRamp2(c(-0.5, 0, 1), c("black", "#EBEBEB", "violet"))
+col_fun4 = colorRamp2(c(-0.5, 0, 1), c("black", "#EBEBEB", "purple"))
+col_fun5 = colorRamp2(c(-0.5, 0, 1), c("black", "#EBEBEB", "turquoise"))
+col_fun6 = colorRamp2(c(-0.5, 0, 1), c("black", "#EBEBEB", "orange"))
+col_fun7 = colorRamp2(c(-0.5, 0, 1), c("black", "#EBEBEB", "magenta"))
+col_fun8 = colorRamp2(c(-0.5, 0, 1), c("black", "#EBEBEB", "brown"))
+col_fun9 = colorRamp2(c(-0.5, 0, 1), c("black", "#EBEBEB", "coral"))
+col_fun10 = colorRamp2(c(-0.5, 0, 1), c("black", "#EBEBEB", "darkgreen"))
+col_fun11 = colorRamp2(c(-0.5, 0, 1), c("black", "#EBEBEB", "lightblue"))
+col_fun12 = colorRamp2(c(-0.5, 0, 1), c("black", "#EBEBEB", "salmon"))
+col_fun13 = colorRamp2(c(-0.5, 0, 1), c("black", "#EBEBEB", "gold"))
+col_fun14 = colorRamp2(c(-0.5, 0, 1), c("black", "#EBEBEB", "burlywood"))
+col_fun15 = colorRamp2(c(-0.5, 0, 1), c("black", "#EBEBEB", "aquamarine"))
+col_fun16 = colorRamp2(c(-0.5, 0, 1), c("black", "#EBEBEB", "darkorange"))
+col_fun17 = colorRamp2(c(-0.5, 0, 1), c("black", "#EBEBEB", "blue"))
+col_fun18 = colorRamp2(c(-0.5, 0, 1), c("black", "#EBEBEB", "black"))
+col_fun19 = colorRamp2(c(-0.5, 0, 1), c("black", "#EBEBEB", "darksalmon"))
+
+col_list<-list("HERITABILITY (continuous h2 value)"=col_fun,"HERITABILITY (Wright et al.,Nature Genetics 2014)"=col_fun1,"M146_MHC-TLR7-TLR8 cluster"=col_fun2,"M47_M47.2_M69_enriched in B cells (I/III/VI)"=col_fun3,"S2_B cell surface signature"=col_fun4,"M5.0_regulation of antigen presentation and immune response"=col_fun5,"M37.0_immune activation - generic cluster"=col_fun6,"M7.2_M61_enriched in NK cells (I/II)"=col_fun7,"M37.1_enriched in neutrophils (I)"=col_fun8,"M7.0_enriched in T cells (I)"=col_fun9,"M7.1_T cell activation (I)"=col_fun10,"M16_TLR and inflammatory signaling"=col_fun11,"M32.1_platelet activation (II)"=col_fun12,"M5.1_T cell activation and signaling"=col_fun13,"M11_M118_enriched in monocytes (II/IV)"=col_fun14,"S4_Monocyte surface signature"=col_fun15,"M4.3_myeloid cell enriched receptors and transporters"=col_fun16,"M2.0_M2.1_extracellular matrix (I/II)"=col_fun17,"M4.0_cell cycle and transcription"=col_fun18,"M49_transcription regulation in cell development"=col_fun19)
+
+vpars_h_c1<-vpars_h[p_annot_l$clusterid==1,]
+p_annot_l_c1<-p_annot_l[p_annot_l$clusterid==1,]
+vpars_h_c1<-vpars_h_c1[order(p_annot_l_c1$"HERITABILITY (continuous h2 value)", decreasing = T),]
+p_annot_l_c1<-p_annot_l_c1[order(p_annot_l_c1$"HERITABILITY (continuous h2 value)", decreasing = T),]
+p_annot_l_c1$clusterid<-NULL
+mat = t(vpars_h_c1)
+column_ha = HeatmapAnnotation(df = p_annot_l_c1, col = col_list, na_col = "black", show_legend = F, show_annotation_name=F)
+h1<-Heatmap(mat, name = "scVES", top_annotation = column_ha, col = magma(100), cluster_columns=F, cluster_rows=F,show_column_names=F, column_title = "C1")
+
+vpars_h_c1<-vpars_h[p_annot_l$clusterid==2,]
+p_annot_l_c1<-p_annot_l[p_annot_l$clusterid==2,]
+vpars_h_c1<-vpars_h_c1[order(p_annot_l_c1$"HERITABILITY (continuous h2 value)", decreasing = T),]
+p_annot_l_c1<-p_annot_l_c1[order(p_annot_l_c1$"HERITABILITY (continuous h2 value)", decreasing = T),]
+p_annot_l_c1$clusterid<-NULL
+mat = t(vpars_h_c1)
+column_ha = HeatmapAnnotation(df = p_annot_l_c1, col = col_list, na_col = "black", show_legend = F, show_annotation_name=F)
+h2<-Heatmap(mat, name = "scVES", top_annotation = column_ha, col = magma(100), cluster_columns=F, cluster_rows=F,show_column_names=F, column_title = "C2")
+
+vpars_h_c1<-vpars_h[p_annot_l$clusterid==3,]
+p_annot_l_c1<-p_annot_l[p_annot_l$clusterid==3,]
+vpars_h_c1<-vpars_h_c1[order(p_annot_l_c1$"HERITABILITY (continuous h2 value)", decreasing = T),]
+p_annot_l_c1<-p_annot_l_c1[order(p_annot_l_c1$"HERITABILITY (continuous h2 value)", decreasing = T),]
+p_annot_l_c1$clusterid<-NULL
+mat = t(vpars_h_c1)
+column_ha = HeatmapAnnotation(df = p_annot_l_c1, col = col_list, na_col = "black", show_legend = F, show_annotation_name=F)
+h3<-Heatmap(mat, name = "scVES", top_annotation = column_ha, col = magma(100), cluster_columns=F, cluster_rows=F,show_column_names=F, column_title = "C3")
+
+vpars_h_c1<-vpars_h[p_annot_l$clusterid==4,]
+p_annot_l_c1<-p_annot_l[p_annot_l$clusterid==4,]
+vpars_h_c1<-vpars_h_c1[order(p_annot_l_c1$"HERITABILITY (continuous h2 value)", decreasing = T),]
+p_annot_l_c1<-p_annot_l_c1[order(p_annot_l_c1$"HERITABILITY (continuous h2 value)", decreasing = T),]
+p_annot_l_c1$clusterid<-NULL
+mat = t(vpars_h_c1)
+column_ha = HeatmapAnnotation(df = p_annot_l_c1, col = col_list, na_col = "black", show_legend = F)
+h4<-Heatmap(mat, name = "scVES", top_annotation = column_ha, col = magma(100), cluster_columns=F, cluster_rows=F,show_column_names=F, column_title = "C4")
+
+h1+h2+h3+h4
+```
 
 ```{r}
 #visualize variance partitioning for top20 genes per main cluster
