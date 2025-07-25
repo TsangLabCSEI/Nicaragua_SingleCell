@@ -17,7 +17,7 @@ Below are pointers to scripts to reproduce figures and respective pre-processing
 To reproduce the analysis conda environment can be created from one of the yml files in the environment folder or the following singularity container available on https://cloud.sylabs.io/ can be used: \
 ```library://leon.bichmann/nicaragua/nicaragua:latest```
 
-In the case of choosing one of the provided conda environments, also install the local Rpackage ImmuneAgeStability:
+In the case of choosing one of the provided conda environments, also install the local Rpackage ImmuneAgeStability: \
 ```install.packages("Nicaragua_SingleCell/ImmuneAgeStability", repos = NULL, type="source")``` \
 
 ### ImmuneAgeStability Rpackage
