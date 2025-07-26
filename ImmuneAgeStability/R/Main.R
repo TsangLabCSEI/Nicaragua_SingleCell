@@ -13,6 +13,7 @@ library(scales)
 #'
 #' @param signature vector of gene symbols
 #' @return A data frame of subject variance per gene and celltype
+#' @export
 compute_signature_stability<-function(signature){
   subj_vars<-list()
   for (ct in unique(gene_stability_sc_avg$celltype)){
@@ -37,6 +38,7 @@ compute_signature_stability<-function(signature){
 #'
 #' @param signatures named list of vectors of gene symbols
 #' @return A data frame of subject variance per signature and celltype
+#' @export
 compute_multisignature_stability<-function(signatures){
   gene_stability_all<-rbind(bulk_subj_var_gene_df,gene_stability_sc_avg)
   sig_subj_vars<-list()
@@ -44,10 +46,11 @@ compute_multisignature_stability<-function(signatures){
     subj_vars<-list()
     for (ct in unique(gene_stability_all$celltype)){
       if (ct!="ILC"){
-      df_svar<-gene_stability_all[gene_stability_all$celltype==ct,]
-      df_svar<-df_svar[df_svar$gene %in% signatures[[sig]],]
-      df_svar<-df_svar[!is.na(df_svar$batch),]
-      subj_vars[[ct]]<-cbind(df_svar$subject_variance_explained,ct)}
+        df_svar<-gene_stability_all[gene_stability_all$celltype==ct,]
+        df_svar<-df_svar[df_svar$gene %in% signatures[[sig]],]
+        #df_svar<-df_svar[!is.na(df_svar$batch),]
+        subj_vars[[ct]]<-cbind(df_svar$subject_variance_explained,ct)
+      }
     }
     df_svar_ct<-as.data.frame(do.call(rbind,subj_vars))
     colnames(df_svar_ct)<-c("subject_variance","celltype")
@@ -71,6 +74,7 @@ compute_multisignature_stability<-function(signatures){
 #' @param signature_name string of signature name
 #' @param signature_stability_df data frame of subject variance per gene and celltype
 #' @return violinplot
+#' @export
 plot_signature_stability<-function(signature_name,signature_stability_df){
   vioplot(subject_variance~celltype, data=signature_stability_df[signature_stability_df$subset=="foreground",], col = "orange", plotCentre = "line", side = "left", horizontal=FALSE, las=2, xlab="", ylab=paste0(signature_name," subject variance"))
   vioplot(subject_variance~celltype, data=signature_stability_df[signature_stability_df$subset=="background",], col = "lightblue", plotCentre = "line", side = "right", horizontal=FALSE, las=2, add=TRUE, ylab=paste0(signature_name," subject variance"))
@@ -86,10 +90,11 @@ plot_signature_stability<-function(signature_name,signature_stability_df){
 #'
 #' @param A data frame of subject variance per signature and celltype
 #' @return heatmap
+#' @export
 plot_signature_stability_heatmap<-function(multisignature_stability_df){
   celltypes<-c("bulk","B_Mem","B_Naive","CD4_Mem","CD4_Naive","CD8_Mem","CD8_Naive","ILC","MAIT","gdT_Vd1","gdT_Vd2","Mono_Classical","Mono_NonClassical","NK_CD16hi","NK_CD56hi","cDC","pDC")
   multisignature_stability_df$celltype<-factor(multisignature_stability_df$celltype, levels=celltypes)
-  ggplot(data=multisignature_stability_df[multisignature_stability_df$celltype!="ILC",],aes(x=signature,y=celltype,fill=subject_variance))+geom_tile()  + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + scale_fill_viridis_c(option = "magma")
+  ggplot(data=multisignature_stability_df[multisignature_stability_df$celltype!="ILC",],aes(y=signature,x=celltype,fill=subject_variance))+geom_tile()  + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + scale_fill_viridis_c(option = "magma")
 }
 
 
@@ -104,6 +109,7 @@ plot_signature_stability_heatmap<-function(multisignature_stability_df){
 #' @param signature_name string of signature name
 #' @param signature vector of gene symbols
 #' @return data frame of subject variance rate of change per gene and celltype
+#' @export
 compute_signature_stability_rateofchange<-function(signature_name,signature){
   svar_sig_df_list_ct<-list()
   for (ct in names(gene_stability)){
@@ -112,7 +118,11 @@ compute_signature_stability_rateofchange<-function(signature_name,signature){
     svar_df_sig$celltype<-ct
     svar_df_sig$signature<-signature_name
     svar_df_sig$n_genes<-length(unique(svar_df_sig$gene))
-    svar_df_sig<-svar_df_sig[svar_df_sig$window_number<9,]
+    if (ct!="bulk"){
+      svar_df_sig<-svar_df_sig[svar_df_sig$window_number<9,]
+    } else {
+      svar_df_sig<-svar_df_sig
+    }
     svar_df_sig_window<-svar_df_sig %>% group_by(window_number) %>% summarise(mean_vexp_ct=mean(mean_vexp))
     svar_sig_df_list_ct[[ct]]<-svar_df_sig
   }
@@ -131,12 +141,13 @@ compute_signature_stability_rateofchange<-function(signature_name,signature){
 #' @param x string of gene name
 #' @param df data frame of subject variance rate of change
 #' @return linear model coefficients
+#' @export
 calclmodp<-function(x,df){
   form <- mean_vexp ~ window_number
   lmod<-lm(form,df[df$gene==x,])
   coefm<-as.data.frame(t(coef(lmod)))
   res<-tryCatch({
-    coefp<-summary(glht(lmod, linfct = c("window_number = 0")))$test$pvalues[1]
+    coefp<-summary(lmod)$coef["window_number", "Pr(>|t|)"]
   }, error = function(e) {return(NA)})
   coefm$p<-res
   return(unlist(coefm))
@@ -153,6 +164,7 @@ calclmodp<-function(x,df){
 #' @param signature_name string of signature name
 #' @param signature_gene_list vector of gene symbols
 #' @return data frame of subject variance slope of rate of change
+#' @export
 compute_signature_stability_slope<-function(signature_name,signature_gene_list){
   svar_sig_rate_df<-compute_signature_stability_rateofchange(signature_name,signature_gene_list)
   svar_sig_slope_list<-list()
@@ -179,22 +191,15 @@ compute_signature_stability_slope<-function(signature_name,signature_gene_list){
 #'
 #' @param signature_stability_slope data frame of subject variance slope of rate of change
 #' @return radarplot
+#' @export
 plot_signature_stability_radar<-function(signature_stability_slope){
-  df<-bulk_VES_lm_results
   incr_decr_list<-list()
   for (ct in unique(signature_stability_slope$celltype)){
     sig<-unique(signature_stability_slope$signature)
-    if (ct!="bulk"){
     decr<-sum(signature_stability_slope$window_number[((signature_stability_slope$celltype==ct)&(signature_stability_slope$p<=0.05))]<0, na.rm = T)
     incr<-sum(signature_stability_slope$window_number[((signature_stability_slope$celltype==ct)&(signature_stability_slope$p<=0.05))]>0, na.rm = T)
     stab<-sum(abs(signature_stability_slope$p[(signature_stability_slope$celltype==ct)&(signature_stability_slope$`(Intercept)`>0.3)])>0.05, na.rm = T)
     misc<-sum(abs(signature_stability_slope$p[(signature_stability_slope$celltype==ct)&(signature_stability_slope$`(Intercept)`<=0.3)])>0.05, na.rm = T)
-    } else {
-    decr<-sum(unique(signature_stability_slope$gene) %in% df$gene[(df$term=="window_number_demeaned")&(df$beta<0)&(df$pval<=0.05)], na.rm = T)
-    incr<-sum(unique(signature_stability_slope$gene) %in% df$gene[(df$term=="window_number_demeaned")&(df$beta>0)&(df$pval<=0.05)], na.rm = T)
-    stab<-sum(unique(signature_stability_slope$gene) %in% df$gene[(df$term=="intrcpt")&(df$beta>=0.3)], na.rm = T)
-    misc<-sum(unique(signature_stability_slope$gene) %in% df$gene[((df$term=="intrcpt")&(df$beta<0.3))|((df$term=="window_number_demeaned")&(abs(df$pval)>0.05))], na.rm = T)
-    }
     incr_decr_list[[ct]]<-c(decr,incr,stab)
   }
   df_incr_decr<-do.call(rbind,incr_decr_list)
@@ -218,6 +223,7 @@ plot_signature_stability_radar<-function(signature_stability_slope){
 #' @param signature_rateOfchange data frame of subject variance rate of change for gene signature
 #' @param cell_subsets celltypes to be visualized
 #' @return lineplot
+#' @export
 plot_signature_agetrend<-function(signature_rateOfchange, cell_subsets){
   sig<-unique(signature_rateOfchange$signature)
   ggplot(data=signature_rateOfchange[signature_rateOfchange$celltype %in% cell_subsets,], aes(x=window_number,y=mean_vexp, group=celltype, colour=celltype))+ geom_smooth(method = "loess") + theme_bw()+ggtitle(paste0(sig," - ",paste(cell_subsets,collapse = " / ")))
@@ -233,6 +239,7 @@ plot_signature_agetrend<-function(signature_rateOfchange, cell_subsets){
 #' @param signature_rateOfchange data frame of subject variance rate of change for gene signature
 #' @param cell_subsets celltypes to be visualized
 #' @return lineplot
+#' @export
 plot_signature_gene_agetrend<-function(signature_rateOfchange, cell_subsets){
   sig<-unique(signature_rateOfchange$signature)
   ggplot(data=signature_rateOfchange[signature_rateOfchange$celltype %in% cell_subsets,], aes(x=window_number,y=mean_vexp, group=gene, colour=gene))+ geom_smooth(method = "loess", se = F) + theme_bw()+ggtitle(paste0(sig," - ",paste(cell_subsets,collapse = " / ")))
@@ -242,13 +249,14 @@ plot_signature_gene_agetrend<-function(signature_rateOfchange, cell_subsets){
 #' Plot Stacked Bars of Signature Variance Rate of Change Compostion per Celltype
 #'
 #' This function takes a data frame of the slope of subject variance per gene of
-#' a gene signature and celltype as input and categorizes each gene into increasing
-#' (positive slope, p<=0.05) or decreasing (negative slope, p<=0.05) or stable
-#' (p>0.05). It then visualizes the fractions of these categories as radarplot per
+#' a gene signature and celltype as input and categorizes each gene into increasing 
+#' (positive slope, p<=0.05) or decreasing (negative slope, p<=0.05) or stable 
+#' (p>0.05). It then visualizes the fractions of these categories as radarplot per 
 #' celltype.
 #'
 #' @param signature_stability_slope data frame of subject variance slope of rate of change
 #' @return barplot
+#' @export
 plot_signature_stability_bars<-function(signature_stability_slope){
   incr_decr_list<-list()
   df<-bulk_VES_lm_results
