@@ -18,6 +18,8 @@ library(circlize)
 library(dplyr)
 library(ggplot2)
 library(reshape2)
+library(fmsb)
+library(scales)
 
 # load data
 nrchd_gene_df<-read.csv("/home/lb2336/project/NICA/supp_tables_S10.csv") # bulk rna enriched genesets
