@@ -193,13 +193,21 @@ compute_signature_stability_slope<-function(signature_name,signature_gene_list){
 #' @return radarplot
 #' @export
 plot_signature_stability_radar<-function(signature_stability_slope){
+  df<-bulk_VES_lm_results
   incr_decr_list<-list()
   for (ct in unique(signature_stability_slope$celltype)){
     sig<-unique(signature_stability_slope$signature)
+    if (ct!="bulk"){
     decr<-sum(signature_stability_slope$window_number[((signature_stability_slope$celltype==ct)&(signature_stability_slope$p<=0.05))]<0, na.rm = T)
     incr<-sum(signature_stability_slope$window_number[((signature_stability_slope$celltype==ct)&(signature_stability_slope$p<=0.05))]>0, na.rm = T)
     stab<-sum(abs(signature_stability_slope$p[(signature_stability_slope$celltype==ct)&(signature_stability_slope$`(Intercept)`>0.3)])>0.05, na.rm = T)
     misc<-sum(abs(signature_stability_slope$p[(signature_stability_slope$celltype==ct)&(signature_stability_slope$`(Intercept)`<=0.3)])>0.05, na.rm = T)
+    } else {
+    decr<-sum(unique(signature_stability_slope$gene) %in% df$gene[(df$term=="window_number_demeaned")&(df$beta<0)&(df$pval<=0.05)], na.rm = T)
+    incr<-sum(unique(signature_stability_slope$gene) %in% df$gene[(df$term=="window_number_demeaned")&(df$beta>0)&(df$pval<=0.05)], na.rm = T)
+    stab<-sum(unique(signature_stability_slope$gene) %in% df$gene[(df$term=="intrcpt")&(df$beta>=0.3)], na.rm = T)
+    misc<-sum(unique(signature_stability_slope$gene) %in% df$gene[((df$term=="intrcpt")&(df$beta<0.3))|((df$term=="window_number_demeaned")&(abs(df$pval)>0.05))], na.rm = T)
+    }
     incr_decr_list[[ct]]<-c(decr,incr,stab)
   }
   df_incr_decr<-do.call(rbind,incr_decr_list)
