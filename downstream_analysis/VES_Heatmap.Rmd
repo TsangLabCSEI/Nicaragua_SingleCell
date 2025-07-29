@@ -270,8 +270,8 @@ pp4
 ```{r}
 #visualize subject variance partitioning for selected immune response signatures
 
-sigs<-ImmuneAgeStability::baseline_signatures[c("TGSig20","IHM","IFN","ia_bcell","iaa","GPR56highvslow_CD8_EM_sig","DE_CD29hi_CD8_genes")]
-names(sigs)<-c("TGSig20","IHM","IFN","IAB B-cell","IAA","CD8 VM GPR56hi","CD8 VM CD29hi")
+sigs<-ImmuneAgeStability::baseline_signatures[c("IHM","IFN","ia_bcell","iaa","GPR56highvslow_CD8_EM_sig","DE_CD29hi_CD8_genes")]
+names(sigs)<-c("IHM","IFN","IAB B-cell","IAA","CD8 VM GPR56hi","CD8 VM CD29hi")
 multisignature_stability_df<-ImmuneAgeStability::compute_multisignature_stability(sigs)
 ImmuneAgeStability::plot_signature_stability_heatmap(multisignature_stability_df)
 ```
