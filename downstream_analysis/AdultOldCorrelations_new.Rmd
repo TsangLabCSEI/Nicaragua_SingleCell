@@ -7,6 +7,7 @@ output: html_notebook
 library(ggplot2)
 library(stats)
 library(matrixStats)
+library(dplyr)
 ```
 
 ```{r}
@@ -14,9 +15,9 @@ library(matrixStats)
 
 #load bootstrapped variance partition of adult cohort
 #adults: bootstraps[[1-10]], #old bootstraps[[11-20]]
-nind_list<-readRDS("age_subject_variance_VESlist_adult_old_aging_cohort.RDS")
-ultrastab<-readRDS("age_subject_variance_ultrastab.RDS")
-ultrastab_clust_vpars<-readRDS("NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_vpars_object.rds")
+nind_list<-readRDS("/gpfs/gibbs/pi/csei/users/lb2336/signatures/age_subject_variance_VESlist_adult_old_aging_cohort_renorm.RDS")
+ultrastab<-readRDS("/gpfs/gibbs/pi/csei/users/lb2336/signatures/age_subject_variance_ultrastab.RDS")
+ultrastab_clust_vpars<-readRDS("/gpfs/gibbs/pi/csei/users/lb2336/pseudo_bulk/NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_vpars_object_renorm.rds")
 
 age_corr_list<-list()
 age_corrp_list<-list()
@@ -45,7 +46,7 @@ for (ct in names(nind_list)){
    } else if (age=="Old"){
       idxs<-seq(11,20)
    }
-   df_nind<-as.data.frame(cbind(pseudo.sce.list[[idxs[1]]][nind_markers,"Donor_id"],pseudo.sce.list[[idxs[2]]][nind_markers,"Donor_id"],pseudo.sce.list[[idxs[3]]][nind_markers,"Donor_id"],pseudo.sce.list[[idxs[4]]][nind_markers,"Donor_id"],pseudo.sce.list[[idxs[5]]][nind_markers,"Donor_id"],pseudo.sce.list[[idxs[6]]][nind_markers,"Donor_id"],pseudo.sce.list[[idxs[7]]][nind_markers,"Donor_id"],pseudo.sce.list[[idxs[8]]][nind_markers,"Donor_id"],pseudo.sce.list[[idxs[9]]][nind_markers,"Donor_id"],pseudo.sce.list[[idxs[10]]][nind_markers,"Donor_id"]))
+   df_nind<-as.data.frame(cbind(pseudo.sce.list[[idxs[1]]][nind_markers,"subject_variance_explained"],pseudo.sce.list[[idxs[2]]][nind_markers,"subject_variance_explained"],pseudo.sce.list[[idxs[3]]][nind_markers,"subject_variance_explained"],pseudo.sce.list[[idxs[4]]][nind_markers,"subject_variance_explained"],pseudo.sce.list[[idxs[5]]][nind_markers,"subject_variance_explained"],pseudo.sce.list[[idxs[6]]][nind_markers,"subject_variance_explained"],pseudo.sce.list[[idxs[7]]][nind_markers,"subject_variance_explained"],pseudo.sce.list[[idxs[8]]][nind_markers,"subject_variance_explained"],pseudo.sce.list[[idxs[9]]][nind_markers,"subject_variance_explained"],pseudo.sce.list[[idxs[10]]][nind_markers,"subject_variance_explained"]))
    rownames(df_nind)<-nind_markers
    colnames(df_nind)<-c("A","B","C","D","E","F","G","H","I","J")
    df_nind<-rowMedians(as.matrix(df_nind))
@@ -94,7 +95,7 @@ ggplot(data=age_corr_list_df[age_corr_list_df$ultra=="normal",],aes(y=adult,x=yo
 ```{r}
 ### Aging cohort: Young / Adult / Old VES boxplots
 
-age_corr_list_df_ed<-readRDS("age_subject_variance_young_adult_old.RDS")
+age_corr_list_df_ed<-readRDS("/gpfs/gibbs/pi/csei/users/lb2336/signatures/age_subject_variance_young_adult_old.RDS")
 ggplot(data=age_corr_list_df_ed[(age_corr_list_df_ed$ultra=="ultrastab"),],aes(x=celltype,y=adult,fill=age_group))+geom_boxplot()+theme_bw() + geom_point(shape=1, position = position_jitterdodge(jitter.width = 0.1), alpha=0.25) + ylab("VES [ultrastable genes]")
 ```
 

@@ -30,3 +30,5 @@ dependencies:
   - conda-forge::r-colorramps=2.3.4
   - conda-forge::r-viridis=0.6.5
   - conda-forge::r-tidyverse=2.0.0
+  - conda-forge::r-harmony=1.2.3
+  - bioconda::bioconductor-zellkonverter=1.12.1 

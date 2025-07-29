@@ -18,7 +18,7 @@ library(stringr)
 
 ```{r}
 # load single cell seurat object
-dataset.query <- readRDS("NICAall_combined_manual_labeled_cleaned_final.rds")
+dataset.query <- readRDS("/gpfs/gibbs/pi/csei/users/lb2336/sc_annotated_rds_objects/NICAall_combined_manual_labeled_cleaned_final.rds")
 prots<-rownames(dataset.query)[!(str_detect(rownames(dataset.query),"iso")|str_detect(rownames(dataset.query),"Iso"))]
 dataset.query <- dataset.query[prots,]
 dataset.query <- dataset.query[,dataset.query$manual.cid!="doublets"]
