@@ -81,9 +81,9 @@ This Rpackage provides a way to reproduce some of the analysis carried out in ou
 -> **Code to run:** downstream_analysis/VES_Heatmap.Rmd
 
 ### Figure 4A - VES correlation Adult, Old
--> **Data:** Download celltype-specific subject variance of aging cohort from zenodo: "age_subject_variance_VESlist_adult_old_aging_cohort.RDS" \
+-> **Data:** Download celltype-specific subject variance of aging cohort from zenodo: "age_subject_variance_VESlist_adult_old_aging_cohort_renorm.RDS" \
 -> **Data:** Download ultra-stable gene list from zenodo: "age_subject_variance_ultrastab.RDS" \
--> **Data:** Download aggregated pediatric variance partition results from Zenodo: "NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_vpars_object.rds" \
+-> **Data:** Download aggregated pediatric variance partition results from Zenodo: "NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_vpars_object_renorm.rds" \
 -> **Data:** Download aggregated pediatric and aging cohort variance partition results from Zenodo: "age_subject_variance_young_adult_old.RDS" \
 -> **Code to run:** downstream_analysis/AdultOldCorrelations_new.Rmd
 
