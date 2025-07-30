@@ -9,6 +9,12 @@ This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook to guide you on h
 ```{r setup}
 ### load the package
 library(ImmuneAgeStability)
+library(dplyr)
+library(ggplot2)
+library(vioplot)
+library(reshape2)
+library(fmsb)
+library(scales)
 ```
 
 

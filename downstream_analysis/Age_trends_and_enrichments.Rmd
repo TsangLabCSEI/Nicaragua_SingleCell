@@ -472,33 +472,3 @@ ggplot(nk_cc_plot_dat, aes(x = matched.timepoint.age, y = zscore_log_cpm)) +
 
 ```
 
-
-```{r}
-### Correlation analysis of mean expression and scVES per gene and celltype
-vpars_list<-list()
-for (ct in names(dge)){
-dge_cd4n<-dge[[ct]]
-df<-rowMeans(dge_cd4n$normalizedExpr)
-genes<-names(df)
-vpars_cd4n<-vpars[vpars$celltype==ct,]
-genes<-intersect(genes,vpars_cd4n$gene)
-df_corr<-cbind(df[genes],vpars_cd4n[genes,]$subject_variance_explained)
-colnames(df_corr)<-c("mean_geneExpr","scVES")
-df_corr<-as.data.frame(df_corr)
-df_corr<-df_corr[!is.na(df_corr$scVES),]
-p<-plot(df_corr$mean_geneExpr,df_corr$scVES, main=ct)
-ss10 <- smooth.spline(df_corr$mean_geneExpr,df_corr$scVES, df = 10)
-lines(ss10, lty = 2, col = "red", lwd=2)
-x <- as.vector(df_corr$mean_geneExpr)
-y <- as.vector(df_corr$scVES)
-fit_linear <- lm(y ~ x)
-linear_residuals <- fit_linear$residuals
-#vpars_ct<-vpars[vpars$celltype==ct,]
-#vpars[vpars$celltype==ct,][rownames(df_corr),"subject_variance_explained"]<-linear_residuals
-#vpars_ct[rownames(df_corr),]$"subject_variance_explained"<-linear_residuals
-df<-as.data.frame(cbind(linear_residuals,rep(ct,length(linear_residuals)),rownames(df_corr)))
-colnames(df)<-c("subject_variance_explained","celltype","gene")
-vpars_list[[ct]]<-df
-}
-vpars<-do.call(rbind,vpars_list)
-```

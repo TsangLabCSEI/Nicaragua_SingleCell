@@ -20,7 +20,11 @@ compute_signature_stability<-function(signature){
     df_svar<-gene_stability_sc_avg[gene_stability_sc_avg$celltype==ct,]
     subj_vars[[paste0(ct,"-background")]]<-cbind(df_svar$subject_variance_explained,ct,"background")
     df_svar<-gene_stability_sc_avg[gene_stability_sc_avg$celltype==ct,][signature,]
-    df_svar<-df_svar[!is.na(df_svar$batch),]
+    df_svar<-df_svar[!is.na(df_svar$subject_variance_explained),]
+    if (dim(df_svar)[1]==0){
+      df_svar<-rbind(df_svar,c(0,0,0,0,ct,"NA"))
+      colnames(df_svar)<-c("subject_variance_explained","gender_variance_explained","age_variance_explained","residual_variance_explaine","celltype","gene")
+    }
     subj_vars[[paste0(ct,"-foreground")]]<-cbind(df_svar$subject_variance_explained,ct,"foreground")
   }
   df_svar_ct<-as.data.frame(do.call(rbind,subj_vars))
