@@ -89,7 +89,22 @@ age_corrp_list_df<-as.data.frame(do.call(rbind,age_corrp_list))
 colnames(age_corrp_list_df)<-c("rho","p-val","pearson","slope","celltype","age")
 age_corr_list_df$ct_age_grp<-paste0(age_corr_list_df$celltype,"-",age_corr_list_df$age_group)
 age_corr_list_df$ct_age_grp_fct<-factor(age_corr_list_df$ct_age_grp,levels=c("Bcells-Adult","Monocytes-Adult","NKcells-Adult","Tcells_CD4-Adult","Tcells_CD8-Adult","Bcells-Old","Monocytes-Old","NKcells-Old","Tcells_CD4-Old","Tcells_CD8-Old"))
-ggplot(data=age_corr_list_df[age_corr_list_df$ultra=="normal",],aes(y=adult,x=young)) + geom_point(colour="black") + geom_density_2d(bins=150) + geom_abline(intercept = 0, slope = 1) + geom_point(data=age_corr_list_df[age_corr_list_df$ultra=="ultrastab",],aes(y=adult,x=young), colour="red") + geom_smooth(method="lm",formula=y~x+0, se=F, lty=2, color="orange", lwd=1) + facet_wrap(vars(ct_age_grp_fct),nrow = 2) + theme_light()
+ggplot(data=age_corr_list_df[age_corr_list_df$ultra=="normal",],aes(y=adult,x=young)) + geom_point(colour="black") + geom_density_2d(bins=150) + geom_abline(intercept = 0, slope = 1, color="blue", lwd=1) + geom_point(data=age_corr_list_df[age_corr_list_df$ultra=="ultrastab",],aes(y=adult,x=young), colour="red") + geom_smooth(method="lm",formula=y~x+0, se=F, lty=2, color="orange", lwd=1) + facet_wrap(vars(ct_age_grp_fct),nrow = 2) + theme_light()
+
+age_corr_list_df.filt<-age_corr_list_df[age_corr_list_df$ct_age_grp %in% c("Monocytes-Adult","Monocytes-Old","Tcells_CD8-Adult","Tcells_CD8-Old"),]
+ggplot(data=age_corr_list_df.filt[age_corr_list_df.filt$ultra=="normal",],aes(y=adult,x=young)) + geom_point(colour="black") + geom_density_2d(bins=150) + geom_abline(intercept = 0, slope = 1, color="blue", lwd=1) + geom_point(data=age_corr_list_df.filt[age_corr_list_df.filt$ultra=="ultrastab",],aes(y=adult,x=young), colour="red") + geom_smooth(method="lm",formula=y~x+0, se=F, lty=2, color="orange", lwd=1) + facet_wrap(vars(ct_age_grp_fct),nrow = 2) + theme_light()
+
+```
+```{r}
+age_corr_list_df.filt$delta<-age_corr_list_df.filt$adult-age_corr_list_df.filt$young
+age_corr_list_df.filt<-age_corr_list_df.filt[order(age_corr_list_df.filt$delta),]
+delta_adults_df<-rbind(head(age_corr_list_df.filt[which((age_corr_list_df.filt$ultra=="ultrastab")&(age_corr_list_df.filt$age_group=="Adult")),], 5),tail(age_corr_list_df.filt[which((age_corr_list_df.filt$ultra=="ultrastab")&(age_corr_list_df.filt$age_group=="Adult")),], 5))
+delta_adults_df$gene<-factor(delta_adults_df$gene, levels = delta_adults_df$gene)
+ggplot(data=delta_adults_df,aes(y=gene,x=delta, fill=celltype))+geom_bar(stat = "identity") + theme_classic() + scale_fill_manual(values=c("black","grey")) + xlab("delta VES [young-adult]") + ylab("") + ggtitle("Adult")
+
+delta_olds_df<-rbind(head(age_corr_list_df.filt[which((age_corr_list_df.filt$ultra=="ultrastab")&(age_corr_list_df.filt$age_group=="Old")),], 5),tail(age_corr_list_df.filt[which((age_corr_list_df.filt$ultra=="ultrastab")&(age_corr_list_df.filt$age_group=="Old")),], 5))
+delta_olds_df$gene<-factor(delta_olds_df$gene, levels = delta_olds_df$gene)
+ggplot(data=delta_olds_df,aes(y=gene,x=delta, fill=celltype))+geom_bar(stat = "identity") + theme_classic() + scale_fill_manual(values=c("black","grey")) + xlab("delta VES [young-old]") + ylab("") + ggtitle("Old")
 ```
 
 ```{r}
