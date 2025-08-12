@@ -1,10 +1,3 @@
----
-title: "Heatmap - subject variability of highly subject specific functional genes"
-output: html_notebook
----
-
-
-```{r}
 # set seed
 set.seed(4)
 
@@ -22,22 +15,19 @@ library(fmsb)
 library(scales)
 
 # load data
-nrchd_gene_df<-read.csv("/home/lb2336/project/NICA/supp_tables_S10.csv") # bulk rna enriched genesets
-bulk_subj_var_gene_df<-read.csv("/home/lb2336/project/NICA/supp_tables_S9.csv") # bulk rna subject variance
-rownames(bulk_subj_var_gene_df)<-bulk_subj_var_gene_df$Gene
-enrichment_df<-readRDS("/gpfs/gibbs/pi/csei/users/lb2336/pseudo_bulk/NICA_batch2to4_new_timepoints_fsex_subject_enriched_with_labels.rds") # single cell rna enriched genesets
+nrchd_gene_df<-read.csv("data/input/supp_tables_S10.csv") # bulk rna enriched genesets
+enrichment_df<-readRDS("data/input/NICA_batch2to4_new_timepoints_fsex_subject_enriched_with_labels.rds") # single cell rna enriched genesets
 enrichment_df<-enrichment_df[str_detect(enrichment_df$pathway,"btm"),]
-vpars<-readRDS("/gpfs/gibbs/pi/csei/users/lb2336/pseudo_bulk/NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_vpars_object.rds") # single cell gene-wise variance partition
-inh<-read.csv("/home/lb2336/project/NICA/inheritability_data_pvals.csv") # hertability data of gene expression (Wright et al 2014, Nat Genet.)
-inh777<-read.csv("/home/lb2336/project/NICA/inheritability_data_777.csv")
+vpars<-readRDS("data/input/NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_vpars_object.rds") # single cell gene-wise variance partition
+inh<-read.csv("data/input/inheritability_data_pvals.csv") # hertability data of gene expression (Wright et al 2014, Nat Genet.)
+inh777<-read.csv("data/input/inheritability_data_777.csv")
 inh777<-inh777$X
 inh777<-inh[which(inh$probe.id %in% inh777),]$gene.symbol
 inh_grouped<-inh %>% group_by(gene.symbol) %>% summarize(h2_max=max(h2))
 inh_grouped <- as.data.frame(inh_grouped)
 rownames(inh_grouped) <- inh_grouped$gene.symbol
-```
 
-```{r}
+
 # adapt loaded geneset list
 genesetl<-list()
 for (i in seq(1,nrow(nrchd_gene_df))){
@@ -104,11 +94,9 @@ p<-pheatmap(t(vpars_h), scale="none", clustering_distance_cols="correlation", cu
 
 # cut heatmap tree
 p_annot_l$clusterid<-cutree(p$tree_col, k = 4)
-```
 
-```{r}
+
 library(ComplexHeatmap)
-
 col_fun = colorRamp2(c(-0.5, 0, 1), c("blue", "#EBEBEB", "red"))
 col_fun1 = colorRamp2(c(-0.5, 0, 1), c("black", "#EBEBEB", "red"))
 col_fun2 = colorRamp2(c(-0.5, 0, 1), c("black", "#EBEBEB", "green"))
@@ -168,10 +156,11 @@ mat = t(vpars_h_c1)
 column_ha = HeatmapAnnotation(df = p_annot_l_c1, col = col_list, na_col = "black", show_legend = F)
 h4<-Heatmap(mat, name = "scVES", top_annotation = column_ha, col = magma(100), cluster_columns=F, cluster_rows=F,show_column_names=F, column_title = "C4")
 
+pdf("data/output/VES_Heatmap.pdf",width=12,height=7)
 h1+h2+h3+h4
-```
+dev.off()
 
-```{r}
+
 #visualize variance partitioning for top40 genes per main cluster
 p_annot_l$clusterid<-cutree(p$tree_col, k = 4)[rownames(vpars_h)]
 
@@ -259,28 +248,54 @@ p1 <- ggplot(var_m, aes(x = 0,  y = gene, size=factor(heritability), color="red"
 pp4<-(p2 + theme(legend.position="none") | p1 + theme(legend.position="none")) + plot_layout(widths = c(10, 1))
 
 
-p2
-p1
+pdf("data/output/Bcell_cluster_top40.pdf")
 pp1
+dev.off()
+pdf("data/output/Tcell_cluster_top40.pdf")
 pp2
+dev.off()
+pdf("data/output/NKcell_cluster_top40.pdf")
 pp3
+dev.off()
+pdf("data/output/Monocyte_cluster_top40.pdf")
 pp4
-```
+dev.off()
 
-```{r}
+
 #visualize subject variance partitioning for selected immune response signatures
 library(ImmuneAgeStability)
-
 sigs<-ImmuneAgeStability::baseline_signatures[c("IHM","IFN","ia_bcell","iaa","GPR56highvslow_CD8_EM_sig","DE_CD29hi_CD8_genes")]
 names(sigs)<-c("IHM","IFN","IAB B-cell","IAA","CD8 VM GPR56hi","CD8 VM CD29hi")
 multisignature_stability_df<-ImmuneAgeStability::compute_multisignature_stability(sigs)
+pdf("data/output/signature_stability_heatmap.pdf")
 ImmuneAgeStability::plot_signature_stability_heatmap(multisignature_stability_df)
-```
+dev.off()
 
-
-```{r}
 #visualize subject variance time trends for selected immune response signature
 
 stability_slope_df<-ImmuneAgeStability::compute_signature_stability_slope(signature_name = "IAB-Bcell", signature = ImmuneAgeStability::baseline_signatures$ia_bcell)
+pdf("data/output/IAB-Bcell-stability_trend.pdf")
 ImmuneAgeStability::plot_signature_stability_bars(stability_slope_df)
-```
+dev.off()
+
+stability_slope_df<-ImmuneAgeStability::compute_signature_stability_slope(signature_name = "IFN", signature = ImmuneAgeStability::baseline_signatures$IFN)
+pdf("data/output/IFN-stability_trend.pdf")
+ImmuneAgeStability::plot_signature_stability_bars(stability_slope_df)
+dev.off()
+
+stability_slope_df<-ImmuneAgeStability::compute_signature_stability_slope(signature_name = "CD8 VM GPR56hi", signature = ImmuneAgeStability::baseline_signatures$GPR56highvslow_CD8_EM_sig)
+pdf("data/output/CD8_VM_GPR56hi-stability_trend.pdf")
+ImmuneAgeStability::plot_signature_stability_bars(stability_slope_df)
+dev.off()
+
+
+#visualize explicit subject variance time trend of IFN signature for monocytes
+stability_rateOfchange_df<-compute_signature_stability_rateofchange(signature_name = "IFN", signature = baseline_signatures$IFN)
+pdf("data/output/IFN-stability_trend_explicit_monocytes.pdf")
+plot_signature_agetrend(signature_rateOfchange = stability_rateOfchange_df,cell_subsets = c("Mono_Classical","Mono_NonClassical"))
+dev.off()
+
+stability_rateOfchange_df<-compute_signature_stability_rateofchange(signature_name = "IFN - genes", signature = age_trajectories$`IFN genes`)
+pdf("data/output/IFN-stability_trend_explicit_monocytes_genes.pdf")
+plot_signature_gene_agetrend(signature_rateOfchange = stability_rateOfchange_df,cell_subsets = c("Mono_Classical"))
+dev.off()

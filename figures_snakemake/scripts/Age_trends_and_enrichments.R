@@ -1,10 +1,3 @@
----
-title: "Age & Subject gene set enrichment + visualization"
-output: html_notebook
----
-
-
-```{r}
 #load libraries
 library(ggplot2)
 library(fgsea)
@@ -15,12 +8,10 @@ library(stringr)
 library(dplyr)
 library(tidyr)
 library(tibble)
-```
 
 
-```{r}
 #load age-trajectory cluster data
-cluster_gene_df<-read.csv("/Users/leon/Documents/NICA/sc_analysis/data/supp_tables_S6.csv")
+cluster_gene_df<-read.csv("data/input/supp_tables_S6.csv")
 c1_markers<-cluster_gene_df[which(cluster_gene_df$Cluster==1),]$Gene
 c2_markers<-cluster_gene_df[which(cluster_gene_df$Cluster==2),]$Gene
 c3_markers<-cluster_gene_df[which(cluster_gene_df$Cluster==3),]$Gene
@@ -31,7 +22,7 @@ c7_markers<-cluster_gene_df[which(cluster_gene_df$Cluster==7),]$Gene
 c8_markers<-cluster_gene_df[which(cluster_gene_df$Cluster==8),]$Gene
 
 # bulk RNAseq subject-variance enriched genesets
-nrchd_gene_df<-read.csv("/Users/leon/Documents/NICA/sc_analysis/data/supp_tables_S10.csv") 
+nrchd_gene_df<-read.csv("data/input/supp_tables_S10.csv") 
 
 
 #create list of cluster genesets
@@ -44,51 +35,24 @@ genesetl[["C5: Cell cycle,division,\n interferon response"]]<-c5_markers
 genesetl[["C6: Adhesion, proliferation,\n cytoskeleton"]]<-c6_markers
 genesetl[["C7: Integrins, Hormones"]]<-c7_markers
 genesetl[["C8: Ig heavy and light chain,\n B cells, cell cycle"]]<-c8_markers
-#genesetl[["IFN genes"]]<-inf_marker
-#genesetl[["Steroid genes"]]<-strd_marker
 
 #load variance partitioning results
-vpars<-readRDS("/Users/leon/Documents/NICA/sc_analysis/data/NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_vpars_object.rds") # aggregated
-all_tts<-readRDS("/Users/leon/Documents/NICA/sc_analysis/data/NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_spline.rds") #raw with stats
+vpars<-readRDS("data/input/NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_vpars_object.rds") # aggregated
+all_tts<-readRDS("data/input/NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_spline.rds") #raw with stats
 
 #load normalized pseudobulk scRNAseq data
-dge <- readRDS("/Users/leon/Documents/NICA/sc_analysis/data/NICA_batch2to4_new_timepoints_cleaned_normalized.rds")
-```
+dge <- readRDS("data/input/NICA_batch2to4_new_timepoints_cleaned_normalized.rds")
 
-```{r}
+
 ### Computation of age variance gene set enrichments
 
 #set seed
 set.seed(1)
 
-#enrich age-sorted list
-enrichment_list<-list()
-for (ct in unique(vpars$celltype)){
-  vpars_ct<-vpars[which(!(vpars$celltype %in% c("doublets"))),]
-  ranks <- vpars_ct[which(vpars_ct$celltype==ct),]$age_variance_explained
-  names(ranks)<-vpars_ct[which(vpars_ct$celltype==ct),]$gene
-  ranks <- sort(ranks, decreasing = T)
 
-  enrichment_list[[ct]]<-fgsea(pathways = genesetl, ranks)
-  enrichment_list[[ct]]<-enrichment_list[[ct]][enrichment_list[[ct]]$pval<=0.05]
-  enrichment_list[[ct]]$celltype<-ct
-}
-
-enrichment_df<-do.call(rbind,enrichment_list)
-enrichment_df$nlog_pval<-(-log10(enrichment_df$pval))
-enrichment_df$celltype<-as.vector(sapply(enrichment_df$celltype,function(x){gsub("NonClassical","N.C.",x)}))
-
-
-ggplot(
-  data=enrichment_df, 
-  aes(y=pathway, x=celltype,colour=NES)) + geom_point(aes(size=nlog_pval)) + theme_bw() + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), text = element_text(size=18)) + scale_y_discrete(position = "right")
-```
-
-```{r}
 ### Correlation analysis of bulk cluster 3 gene module with age across celltypes
 cluster_tt_means<-list()
 for (ct in names(all_tts)[which(!(names(all_tts) %in% c("doublets","ILC")))]){
-print(ct)
 dge_c<-dge[[ct]]
 dge_c$normalizedExpr <- dge_c$normalizedExpr[, which(as.numeric(dge_c$samples$matched.timepoint.age)<=14)]
 tt<-all_tts[[ct]]
@@ -131,23 +95,12 @@ colnames(data3)<-c("timepoints","celltype","value")
 ggplot(
   data=data3, #c("B_Mem","B_Naive","CD4_Naive","CD4_Mem","CD8_Mem","CD8_Naive","MAIT","Mono_Classical","gdT_Vd2", "NK_CD16hi"))
   aes(x=timepoints, y=value,color=celltype)) + stat_smooth(geom='line', alpha=0.25, se=FALSE) + stat_smooth(data=data3[which(data3$celltype %in% c("B_Naive","B_Mem","CD4_Naive","CD4_Mem","CD8_Mem","CD8_Naive","MAIT","gdT_Vd1","gdT_Vd2","Mono_Classical","NK_CD16hi")),], geom='line', se=FALSE) + theme_classic()+ theme(text = element_text(size=15)) + scale_x_continuous(limits=c(3, 14),breaks=seq(3,14,2))+ggtitle("C3: Steroid response module across celltypes")+theme(legend.position = "none")
+ggsave("data/output/C3_STRD_AgeTrend.pdf")
 
-data3<-data3[!is.na(data3$value),]
-cor.list<-list()
-for (ct in unique(data3$celltype)){
-    model<-augment(loess(value ~ timepoints, data = data3[data3$celltype==ct,]),data3[data3$celltype==ct,])
-    cor.list[[ct]]<-cor.test(model$timepoints,model$.fitted,method = "spearman")$p.value
-    if(cor.list[[ct]]<=0.05){
-        print(ct)
-    }
-}
-```
 
-```{r}
 ### Correlation analysis of bulk cluster 5 gene module with age across celltypes
 cluster_tt_means<-list()
 for (ct in names(all_tts)[which(!(names(all_tts) %in% c("doublets","ILC")))]){
-print(ct)
 dge_c<-dge[[ct]]
 dge_c$normalizedExpr <- as.data.frame(dge_c$normalizedExpr)[, which(as.numeric(dge_c$samples$matched.timepoint.age)<=14)]
 tt<-all_tts[[ct]]
@@ -189,74 +142,10 @@ colnames(data3)<-c("timepoints","celltype","value")
 ggplot(
   data=data3, 
   aes(x=timepoints, y=value,color=celltype)) + stat_smooth(geom='line', alpha=0.25, se=FALSE, span=1) + stat_smooth(data=data3[which(data3$celltype %in% c("B_Naive","B_Mem","CD4_Naive","CD4_Mem","CD8_Naive","CD8_Mem","cDC","MAIT","gdT_Vd1","gdT_Vd2","Mono_Classical","Mono_NonClassical","NK_CD16hi")),], geom='line', se=FALSE, span=1) + theme_classic()+ theme(text = element_text(size=15)) + scale_x_continuous(limits=c(3, 14),breaks=seq(3,14,2))+ggtitle("C5: IFN response module across celltypes")+theme(legend.position = "none")
+ggsave("data/output/C5_INF_AgeTrend.pdf")
 
 
-data3<-data3[!is.na(data3$value),]
-cor.list<-list()
-for (ct in unique(data3$celltype)){
-    model<-augment(loess(value ~ timepoints, data = data3[data3$celltype==ct,]),data3[data3$celltype==ct,])
-    cor.list[[ct]]<-cor.test(model$timepoints,model$.fitted,method = "spearman")$p.value
-    if(cor.list[[ct]]<=0.05){
-        print(ct)
-    }
-}
-
-```
-
-```{r}
-### Computation of subject variance gene set enrichments
-
-#set seed
-set.seed(4)
-
-genesetl<-list()
-for (i in seq(1,nrow(nrchd_gene_df))){
-  gset<-unlist(str_split(nrchd_gene_df$leadingEdge[i]," "))
-  genesetl[[paste(str_split(nrchd_gene_df$pathway[i],"_")[[1]][2:3],collapse="_")]]<-gset
-}
-
-#enrich subject-sorted list
-enrichment_list<-list()
-for (ct in unique(vpars$celltype)){
-  vpars_ct<-vpars[which(!(vpars$celltype %in% c("doublets"))),]
-  ranks <- vpars_ct[which(vpars_ct$celltype==ct),]$subject_variance_explained
-  names(ranks)<-vpars_ct[which(vpars_ct$celltype==ct),]$gene
-  ranks <- sort(ranks, decreasing = F)
-
-  enrichment_list[[ct]]<-fgsea(pathways = genesetl, ranks)
-  enrichment_list[[ct]]<-enrichment_list[[ct]][enrichment_list[[ct]]$padj<0.05]
-  enrichment_list[[ct]]$celltype<-ct
-}
-
-enrichment_df<-do.call(rbind,enrichment_list)
-enrichment_df$nlog_pval<-(-log10(enrichment_df$padj))
-```
-
-
-
-```{r}
-#Visualization of expression of a steroid hormone gene NR3C2 across individuals and age
-dge_cd4n<-dge$CD4_Naive
-df<-cbind(scale(dge_cd4n$normalizedExpr["NR3C2",]),dge_cd4n$samples$matched.individual,dge_cd4n$samples$matched.timepoint.age,dge_cd4n$samples$gender)
-colnames(df)<-c("expression","individual","age","gender")
-df<-as.data.frame(df)
-df$expression<-as.numeric(df$expression)
-df$age<-as.numeric(df$age)
-ggplot(df[df$individual!="nica4416",],aes(x=age,y=expression,group=individual,color=individual))+geom_point()+geom_smooth(se = F, formula = 'y ~ log(x)', method = 'lm') + theme_bw() + ggtitle("NR3C2 - CD4_Naive") + scale_x_continuous(limits=c(3, 14),breaks=seq(3,14,2))
-```
-
-```{r}
-#Visualization of expression of a IFN response gene IRF7 across individuals and age
-dge_cd4n<-dge$CD8_Naive
-df<-cbind(scale(dge_cd4n$normalizedExpr["IRF7",]),dge_cd4n$samples$matched.individual,dge_cd4n$samples$matched.timepoint.age)
-colnames(df)<-c("expression","individual","age")
-df<-as.data.frame(df)
-df$expression<-as.numeric(df$expression)
-df$age<-as.numeric(df$age)
-ggplot(df[df$individual!="nica4416",],aes(x=age,y=expression,color=individual))+geom_point()+geom_smooth(se = F, formula = 'y ~ log(x)', method = 'lm') + theme_bw() + ggtitle("IRF7 - CD8_Naive") + scale_x_continuous(limits=c(3, 14),breaks=seq(3,14,2))
-```
-
-```{r}
+# Simplified age model results
 fgsea_list<-readRDS("/gpfs/gibbs/pi/csei/users/lb2336/pseudo_bulk/NICA_batch2to4_new_timepoints_limma_fgsea_simplified_age_results.rds")
 fgsea_dat <- bind_rows(fgsea_list, .id = "celltype")
 fgsea_dat$nlog_pval <- -log10(fgsea_dat$padj)
@@ -296,22 +185,24 @@ fgsea_dat %>% filter(pathway %in% keep_pathways) %>%
     theme_bw() +
     theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 
-```
+ggsave("data/output/sc_age_gene_set_enrichment_selected.pdf")
 
-```{r}
+
+
 #Visualize all pathways passing minor filter critera
 pbulk <- dge
 keep_pathways <- mean_abs_nes_dat %>%
-                 filter(mean_pval < .25) %>%
-		 pull(pathway)
+	  	 filter(mean_pval < .25) %>%
+	    	 pull(pathway)
 
 ggplot(fgsea_dat %>% filter(pathway %in% keep_pathways), aes(x = celltype, y = pathway)) +
-			geom_point(aes(size = -log10(padj), color = NES, shape = padj < .05)) +
-		     	scale_color_gradient2(low = "blue",mid = "white",high = "red") +
-			theme_bw() +
-			theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
-			ggtitle("Genesets that change with age")
+	geom_point(aes(size = -log10(padj), color = NES, shape = padj < .05)) +
+	scale_color_gradient2(low = "blue",mid = "white",high = "red") +
+	theme_bw() +
+	theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+	ggtitle("Genesets that change with age")
 
+ggsave("data/output/limma_fgsea_bubble_celltype_unspecific.pdf", height = 20, width = 14)
 
 #Visualize all pathways passing minor filter critera celltype specific
 celltypes <- names(pbulk)
@@ -329,15 +220,15 @@ keep_pathways_celltype_specific <- unique(unlist(keep_pathways_celltype_specific
 fgsea_dat %>% filter(pathway %in% keep_pathways_celltype_specific) %>%
 		mutate(pathway = factor(pathway, levels = keep_pathways_celltype_specific)) %>%
 		ggplot(aes(x = celltype, y = pathway)) +
-		geom_point(aes(size = -log10(padj), color = NES, shape = padj < .05)) +
-		scale_color_gradient2(low = "blue",mid = "white",high = "red") +
-		theme_bw() +
-		theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
-		ggtitle("Genesets that change with age - celltype specific")
-```
+			geom_point(aes(size = -log10(padj), color = NES, shape = padj < .05)) +
+			scale_color_gradient2(low = "blue",mid = "white",high = "red") +
+			theme_bw() +
+			theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+			ggtitle("Genesets that change with age - celltype specific")
+
+ggsave("data/output/limma_fgsea_bubble_celltype_specific.pdf", height = 20, width = 14)
 
 
-```{r}
 #Bcells
 keep_bcell_pathways <- c(
   "reactome_Signaling by the B Cell Receptor (BCR)",
@@ -375,6 +266,8 @@ ggplot(bcell_plot_dat %>% filter(!grepl("IG", gene)), aes(x = matched.timepoint.
   ggtitle("BCR and FC receptor signaling in Memory B cells") +
   coord_cartesian(ylim = c(-1, 1), xlim = c(3, 14))
 
+ggsave("data/output/sc_FGCR_genes_age_trajectory.pdf")
+
 
 #Monocyte Antigen processing and presentation
 keep_mono_pathways <- c(
@@ -411,6 +304,7 @@ ggplot(mono_plot_dat %>% filter(!grepl("IG", gene)), aes(x = matched.timepoint.a
   ggtitle("Antigen Presentation in Classical Monocytes") +
   coord_cartesian(ylim = c(-1, .8), xlim = c(3, 14))+theme(legend.position = "none")
 
+ggsave("data/output/sc_AntigenPresentation_genes_age_trajectory.pdf")
 
 
 #CD8 TLR & inflammatory pathwyasy
@@ -446,37 +340,8 @@ ggplot(mono_ifn_plot_dat, aes(x = matched.timepoint.age, y = zscore_log_cpm)) +
   ggtitle("TLR inflammatory signaling genes in CD8 Naive cells") +
   coord_cartesian(ylim = c(-1, 1), xlim = c(3, 14))+theme(legend.position = "none")
 
+ggsave("data/output/sc_TLR_genes_age_trajectory.pdf")
 
-
-#Cortico steroid pathwyas in CD4_Memory
-keep_ifn_pathways <- unique(fgsea_dat[str_detect(fgsea_dat$pathway,"_CORTICO"),]$pathway)
-keep_mono_pathways_ifn <- which(fgsea_dat$celltype == "CD4_Mem" & fgsea_dat$pathway %in% keep_ifn_pathways)
-
-keep_ifn_genes <- unique(unlist(fgsea_dat$leadingEdge[keep_mono_pathways_ifn]))
-
-mono_ifn_cpm <- edgeR::cpm(pbulk$CD4_Mem, log = TRUE)
-mono_ifn_plot_dat <- mono_ifn_cpm[keep_ifn_genes, ] %>%
-  t %>% scale %>% t %>%
-  as.data.frame() %>%
-  rownames_to_column("gene") %>%
-  gather(key = "Sample", value = "zscore_log_cpm", -gene) %>%
-  left_join(pbulk$CD4_Mem$samples %>%  rownames_to_column("Sample"))
-
-ggplot(mono_ifn_plot_dat, aes(x = matched.timepoint.age, y = zscore_log_cpm)) +
-  geom_line(stat="smooth", formula = y ~ x,
-            size = 1,
-            #linetype ="dashed",
-            aes(color = gene),
-            alpha = 0.5) +
-  #theme_bw() +
-  theme_classic() +
-  geom_smooth(col = "black", lwd = 1.5) +
-  scale_x_continuous(breaks = c(3, 5, 7, 9, 11, 13)) +
-  xlab("Age (Years)") +
-  ylab("Scaled Expression") +
-  scale_color_viridis_d(option = "mako") +
-  ggtitle("Corticosteroid response genes in CD4 Memory cells") +
-  coord_cartesian(ylim = c(-1, 1), xlim = c(3, 14))+theme(legend.position = "none")
 
 #Cell cycle pathways in CD8_Naive
 keep_cc_pathways <- unique(fgsea_dat[str_detect(fgsea_dat$pathway,"btm_M4.0"),]$pathway)
@@ -508,5 +373,4 @@ ggplot(nk_cc_plot_dat, aes(x = matched.timepoint.age, y = zscore_log_cpm)) +
   ggtitle("Cell cycle and transcription genes in CD8_Naive") +
   coord_cartesian(ylim = c(-1, 1), xlim = c(3, 14))
 
-```
-
+ggsave("data/output/sc_CellCycle_genes_age_trajectory.pdf")
