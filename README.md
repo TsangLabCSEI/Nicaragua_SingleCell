@@ -23,6 +23,12 @@ In the case of choosing one of the provided conda environments, also install the
 ### ImmuneAgeStability Rpackage
 This Rpackage provides a way to reproduce some of the analysis carried out in our study as described in the scripts below. In addition it also enables users to assess any of their own gene expression signatures for aspects of temporal stabilty during childhood. 
 
+### Snakemake workflow to reproduce all figures at once
+If you are familiar with snakemake and simply want to recreate all figures in one step, just run the follwing: \
+-> **GoTo:** figures_snakemake \
+-> **Data:** download all data from the zenodo repository into figures_sakemake/data/input/ \
+-> **Execution:**  ```snakemake --use-singularity```
+
 ### Pre-processing: Pseudobulk Generation from Single Cell Data
 -> **Data:** Download single cell RDS object from Zenodo: "NICAall_combined_manual_labeled_cleaned_final.rds" \
 -> **Code to run:** pseudobulk_processing/export_pseudobulk.R
