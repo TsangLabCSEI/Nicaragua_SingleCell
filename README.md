@@ -29,6 +29,8 @@ If you are familiar with snakemake and simply want to recreate all figures in on
 -> **Data:** download all data from the zenodo repository into figures_sakemake/data/input/ \
 -> **Execution:**  ```snakemake --use-singularity```
 
+## Details on pre-processing and figure notebooks
+
 ### Pre-processing: Pseudobulk Generation from Single Cell Data
 -> **Data:** Download single cell RDS object from Zenodo: "NICAall_combined_manual_labeled_cleaned_final.rds" \
 -> **Code to run:** pseudobulk_processing/export_pseudobulk.R
