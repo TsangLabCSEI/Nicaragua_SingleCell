@@ -58,7 +58,7 @@ dge_c$normalizedExpr <- dge_c$normalizedExpr[, which(as.numeric(dge_c$samples$ma
 tt<-all_tts[[ct]]
 tt$cell.type<-ct
 tt$gene<-row.names(tt)
-overlap<-tt[which((tt$P.Value<0.05)&(tt$gene%in%c3_markers)&(tt$cell.type==ct)),]$gene
+overlap<-tt[which((tt$P.Value<=1)&(tt$gene%in%c3_markers)&(tt$cell.type==ct)),]$gene
 tps<-as.vector(sapply(colnames(dge_c$normalizedExpr),function(x){as.numeric(str_split_i(x,"_",2))}))
 inds<-as.vector(sapply(colnames(dge_c$normalizedExpr),function(x){str_split_i(x,"_",1)}))
 dge_t<-as.data.frame(t(dge_c$normalizedExpr))
