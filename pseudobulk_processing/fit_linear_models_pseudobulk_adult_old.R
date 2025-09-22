@@ -42,26 +42,28 @@ for (a in c("all_adult_pbulk_list_normalized")){
     print("fit simplified age model")
     form <- ~ (1|Donor_id) + Age + (1 | Batch)
     vobjDream = voomWithDreamWeights( dge, form, meta, suppressWarnings=TRUE)
-    fitmm = dream( vobjDream, form, meta)
-    tt <- topTable(fitmm, "Age", number = Inf)
-    tt$gene<-rownames(tt)
+    vp = fitExtractVarPartModel( vobjDream, form, meta)
+
+    #fitmm = dream( vobjDream, form, meta)
+    #tt <- topTable(fitmm, "Age", number = Inf)
+    #tt$gene<-rownames(tt)
 
     idx<-as.numeric(str_split_i(str_split_i(c,"_",-1),"\\.",1))
     if(grepl("bcells",c)){
       tt$cell.type<-"Bcells"
-      all_tts_bcells_vpar[[idx]]<-tt
+      all_tts_bcells_vpar[[idx]]<-vp
     } else if (grepl("nkcells",c)){
       tt$cell.type<-"NKcells"
-      all_tts_nkcells_vpar[[idx]]<-tt
+      all_tts_nkcells_vpar[[idx]]<-vp
     } else if (grepl("mye",c)){
       tt$cell.type<-"Monocytes"
-      all_tts_myecells_vpar[[idx]]<-tt
+      all_tts_myecells_vpar[[idx]]<-vp
     } else if (grepl("cd4",c)){
       tt$cell.type<-"Tcells_CD4"
-      all_tts_tcellscd4_vpar[[idx]]<-tt
+      all_tts_tcellscd4_vpar[[idx]]<-vp
     } else if (grepl("cd8",c)){
       tt$cell.type<-"Tcells_CD8"
-      all_tts_tcellscd8_vpar[[idx]]<-tt   
+      all_tts_tcellscd8_vpar[[idx]]<-vp   
     } 
   }
   all_tts_vpar[["Bcells"]]<-all_tts_bcells_vpar
