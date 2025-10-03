@@ -11,7 +11,7 @@ library(tibble)
 
 
 #load age-trajectory cluster data
-cluster_gene_df<-read.csv("data/input/supp_tables_S6.csv")
+cluster_gene_df<-read.csv(snakemake@input[["cluster_gene_df"]])
 c1_markers<-cluster_gene_df[which(cluster_gene_df$Cluster==1),]$Gene
 c2_markers<-cluster_gene_df[which(cluster_gene_df$Cluster==2),]$Gene
 c3_markers<-cluster_gene_df[which(cluster_gene_df$Cluster==3),]$Gene
@@ -22,7 +22,7 @@ c7_markers<-cluster_gene_df[which(cluster_gene_df$Cluster==7),]$Gene
 c8_markers<-cluster_gene_df[which(cluster_gene_df$Cluster==8),]$Gene
 
 # bulk RNAseq subject-variance enriched genesets
-nrchd_gene_df<-read.csv("data/input/supp_tables_S10.csv") 
+nrchd_gene_df<-read.csv(snakemake@input[["nrchd_gene_df"]]) 
 
 
 #create list of cluster genesets
@@ -37,11 +37,11 @@ genesetl[["C7: Integrins, Hormones"]]<-c7_markers
 genesetl[["C8: Ig heavy and light chain,\n B cells, cell cycle"]]<-c8_markers
 
 #load variance partitioning results
-vpars<-readRDS("data/input/NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_vpars_object.rds") # aggregated
-all_tts<-readRDS("data/input/NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_spline.rds") #raw with stats
+vpars<-readRDS(snakemake@input[["vpars"]])
+all_tts<-readRDS(snakemake@input[["all_tts"]])
 
 #load normalized pseudobulk scRNAseq data
-dge <- readRDS("data/input/NICA_batch2to4_new_timepoints_cleaned_normalized.rds")
+dge <- readRDS(snakemake@input[["dge"]]) 
 
 
 ### Computation of age variance gene set enrichments
@@ -146,7 +146,7 @@ ggsave("data/output/C5_INF_AgeTrend.pdf")
 
 
 # Simplified age model results
-fgsea_list<-readRDS("/gpfs/gibbs/pi/csei/users/lb2336/pseudo_bulk/NICA_batch2to4_new_timepoints_limma_fgsea_simplified_age_results.rds")
+fgsea_list<-readRDS(snakemake@input[["fgsea_simpl"]])
 fgsea_dat <- bind_rows(fgsea_list, .id = "celltype")
 fgsea_dat$nlog_pval <- -log10(fgsea_dat$padj)
 

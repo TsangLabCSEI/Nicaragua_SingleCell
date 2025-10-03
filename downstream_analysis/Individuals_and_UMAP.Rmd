@@ -18,7 +18,7 @@ library(stringr)
 
 ```{r}
 # load single cell seurat object
-dataset.query <- readRDS("/gpfs/gibbs/pi/csei/users/lb2336/sc_annotated_rds_objects/NICAall_combined_manual_labeled_cleaned_final.rds")
+dataset.query <- readRDS("/gpfs/gibbs/pi/csei/users/lb2336/sc_annotated_rds_objects/NICAall_combined_manual_labeled_new_II_cleaned_noB2_lanes.rds")
 prots<-rownames(dataset.query)[!(str_detect(rownames(dataset.query),"iso")|str_detect(rownames(dataset.query),"Iso"))]
 dataset.query <- dataset.query[prots,]
 dataset.query <- dataset.query[,dataset.query$manual.cid!="doublets"]
@@ -70,17 +70,17 @@ nica.celltypes$gender<-as.vector(t(data.frame(sapply(rownames(nica.celltypes),fu
 #visualize distribution of timepoints per individual
 age_df<-nica.celltypes[c("individual","timepoint","gender")]
 age_df<-age_df[age_df$individual!="nica4416",]
-age_df<-age_df %>% group_by(individual,gender) %>% summarise_at(vars(timepoint),list(max = max, min=min))
+age_df_grouped<-age_df %>% group_by(individual) %>% summarise_at(vars(timepoint),list(max = max, min=min))
+age_df_grouped$idx<-seq(1,15)
+age_df<-merge(age_df,age_df_grouped)
 age_df<-as.data.frame(age_df)
 age_df$V3<-age_df$max - age_df$min
 age_df<-age_df[order(age_df$V3, decreasing = T),]
-age_df$idx<-seq(1,15)
 age_df %>%
     ggplot(aes(x = idx, col=gender)) +
     geom_linerange(aes(ymin = min, ymax = max, x = idx),
-                   size = 1.5, alpha = 0.25) +
-    geom_point(aes(y = min)) +
-    geom_point(aes(y = max)) +
+                   size = 1.5, alpha = 0.05) +
+    geom_point(aes(y = timepoint), size=2) +
     coord_flip() +
     ylab("Followed age range") +
     theme_bw(base_size = 15) +

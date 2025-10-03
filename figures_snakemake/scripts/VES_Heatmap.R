@@ -15,12 +15,12 @@ library(fmsb)
 library(scales)
 
 # load data
-nrchd_gene_df<-read.csv("data/input/supp_tables_S10.csv") # bulk rna enriched genesets
-enrichment_df<-readRDS("data/input/NICA_batch2to4_new_timepoints_fsex_subject_enriched_with_labels.rds") # single cell rna enriched genesets
+nrchd_gene_df<-read.csv(snakemake@input[["nrchd_gene_df"]])
+enrichment_df<-readRDS(snakemake@input[["enrichment_df"]]) 
 enrichment_df<-enrichment_df[str_detect(enrichment_df$pathway,"btm"),]
-vpars<-readRDS("data/input/NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_vpars_object.rds") # single cell gene-wise variance partition
-inh<-read.csv("data/input/inheritability_data_pvals.csv") # hertability data of gene expression (Wright et al 2014, Nat Genet.)
-inh777<-read.csv("data/input/inheritability_data_777.csv")
+vpars<-readRDS(snakemake@input[["vpars"]]) 
+inh<-read.csv(snakemake@input[["heritp"]]) # hertability data of gene expression (Wright et al 2014, Nat Genet.)
+inh777<-read.csv(snakemake@input[["herithh"]]) 
 inh777<-inh777$X
 inh777<-inh[which(inh$probe.id %in% inh777),]$gene.symbol
 inh_grouped<-inh %>% group_by(gene.symbol) %>% summarize(h2_max=max(h2))

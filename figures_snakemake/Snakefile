@@ -32,12 +32,11 @@ rule all:
 
 rule VES_Heatmap:
     input:
-        "data/input/paper_supplementary_tables/supp_tables_S10.csv",
-        "data/input/paper_supplementary_tables/supp_tables_S9.csv",
-        "data/input/variance_partition_results/NICA_batch2to4_new_timepoints_fsex_subject_enriched_with_labels.rds",
-        "data/input/variance_partition_results/NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_vpars_object.rds",
-        "data/input/heritability/inheritability_data_pvals.csv",
-        "data/input/heritability/inheritability_data_777.csv"
+        nrchd_gene_df="data/input/paper_supplementary_tables/supp_tables_S10.csv",
+        enrichment_df="data/input/variance_partition_results/NICA_batch2to4_new_timepoints_fsex_subject_enriched_with_labels.rds",
+        vpars="data/input/variance_partition_results/NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_vpars_object.rds",
+        heritp="data/input/heritability/inheritability_data_pvals.csv",
+        herithh="data/input/heritability/inheritability_data_777.csv"
     output:
         "data/output/VES_Heatmap.pdf",
         "data/output/Bcell_cluster_top40.pdf",
@@ -56,11 +55,12 @@ rule VES_Heatmap:
 
 rule Age_trends_and_enrichments:
     input:
-        "data/input/paper_supplementary_tables/supp_tables_S6.csv",
-        "data/input/paper_supplementary_tables/supp_tables_S10.csv",
-        "data/input/variance_partition_results/NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_vpars_object.rds",
-        "data/input/linear_model_results/NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_spline.rds",
-        "data/input/pseudobulk/NICA_batch2to4_new_timepoints_cleaned_normalized.rds"
+        cluster_gene_df="data/input/paper_supplementary_tables/supp_tables_S6.csv",
+        nrchd_gene_df="data/input/paper_supplementary_tables/supp_tables_S10.csv",
+        vpars="data/input/variance_partition_results/NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_vpars_object.rds",
+        all_tts="data/input/linear_model_results/NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_spline.rds",
+        dge="data/input/pseudobulk/NICA_batch2to4_new_timepoints_cleaned_normalized.rds",
+        fgsea_simpl="data/input/linear_model_results/NICA_batch2to4_new_timepoints_limma_fgsea_simplified_age_results.rds"
     output:
         "data/output/C3_STRD_AgeTrend.pdf",
         "data/output/C5_INF_AgeTrend.pdf",
@@ -77,9 +77,10 @@ rule Age_trends_and_enrichments:
 
 rule AdultOldCorrelations:
     input:
-        "data/input/variance_partition_results/age_subject_variance_VESlist_adult_old_aging_cohort_renorm.RDS",
-        "data/input/gene_sets/age_subject_variance_ultrastab.RDS",
-        "data/input/variance_partition_results/NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_vpars_object_renorm.rds"
+        nind_list="data/input/variance_partition_results/age_subject_variance_VESlist_adult_old_aging_cohort_renorm.RDS",
+        ultrastab="data/input/gene_sets/age_subject_variance_ultrastab.RDS",
+        ultrastab_clust_vpars="data/input/variance_partition_results/NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_vpars_object_renorm.rds",
+        age_corr_list_df_ed="data/input/variance_partition_results/age_subject_variance_young_adult_old.RDS"
     output:
         "data/output/AdultOld_Age_Correlations.pdf",
         "data/output/Adult_Age_Correlations_TopGenes.pdf",
@@ -90,7 +91,7 @@ rule AdultOldCorrelations:
 
 rule individuals_and_UMAP:
     input:
-        "data/input/seurat_object/NICAall_combined_manual_labeled_cleaned_final.rds", 
+        data="data/input/seurat_object/NICAall_combined_manual_labeled_cleaned_final.rds", 
     output:
         "data/output/UMAP.pdf",
         "data/output/individuals.pdf"

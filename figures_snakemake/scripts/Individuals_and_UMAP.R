@@ -9,7 +9,7 @@ library(ggplot2)
 library(stringr)
 
 # load single cell seurat object
-dataset.query <- readRDS("data/input/NICAall_combined_manual_labeled_cleaned_final.rds")
+dataset.query <- readRDS(snakemake@input[["data"]]) 
 prots<-rownames(dataset.query)[!(str_detect(rownames(dataset.query),"iso")|str_detect(rownames(dataset.query),"Iso"))]
 dataset.query <- dataset.query[prots,]
 dataset.query <- dataset.query[,dataset.query$manual.cid!="doublets"]

@@ -8,9 +8,9 @@ library(dplyr)
 
 #load bootstrapped variance partition of adult cohort
 #adults: bootstraps[[1-10]], #old bootstraps[[11-20]]
-nind_list<-readRDS("data/input/age_subject_variance_VESlist_adult_old_aging_cohort_renorm.RDS")
-ultrastab<-readRDS("data/input/age_subject_variance_ultrastab.RDS")
-ultrastab_clust_vpars<-readRDS("data/input/NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_vpars_object_renorm.rds")
+nind_list<-readRDS(snakemake@input[["nind_list"]])
+ultrastab<-readRDS(snakemake@input[["ultrastab"]])
+ultrastab_clust_vpars<-readRDS(snakemake@input[["ultrastab_clust_vpars"]])
 
 age_corr_list<-list()
 age_corrp_list<-list()
@@ -102,7 +102,7 @@ ggsave("data/output/Old_Age_Correlations_TopGenes.pdf")
 
 ### Aging cohort: Young / Adult / Old VES boxplots
 
-age_corr_list_df_ed<-readRDS("/gpfs/gibbs/pi/csei/users/lb2336/signatures/age_subject_variance_young_adult_old.RDS")
+age_corr_list_df_ed<-readRDS(snakemake@input[["age_corr_list_df_ed"]])
 ggplot(data=age_corr_list_df_ed[(age_corr_list_df_ed$ultra=="ultrastab"),],aes(x=celltype,y=adult,fill=age_group))+geom_boxplot()+theme_bw() + geom_point(shape=1, position = position_jitterdodge(jitter.width = 0.1), alpha=0.25) + ylab("VES [ultrastable genes]")
 ggsave("data/output/AdultOld_Age_Correlations_Boxplot.pdf")
 
