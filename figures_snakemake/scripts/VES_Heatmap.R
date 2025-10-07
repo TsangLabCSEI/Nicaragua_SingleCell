@@ -163,6 +163,7 @@ dev.off()
 
 #visualize variance partitioning for top40 genes per main cluster
 p_annot_l$clusterid<-cutree(p$tree_col, k = 4)[rownames(vpars_h)]
+vpars<-vpars[c("batch_variance_explained","subject_variance_explained","sex_variance_explained","residual_variance_explained","age_variance_explained","celltype","gene")]
 
 #var_b (Bcell dominated cluster)
 var_b<-vpars[vpars$gene %in% row.names(p_annot_l[which(p_annot_l$clusterid==4),]),]
@@ -177,7 +178,7 @@ var_b_subj<-var_b[var_b$variable=="Subject",]
 var_b_subj<-var_b_subj[order(var_b_subj$value, decreasing = T),]
 var_b<-rbind(var_b_subj,var_b[var_b$variable!="Subject",])
 var_b$variable<-factor(var_b$variable,levels=c("Residuals","Age","Sex","Subject"))
-p2<-ggplot(data=var_b,aes(y=gene,x=value,group=variable,fill=variable))+geom_bar(stat='identity',colour="black",size=0.25)+scale_y_discrete(limits = rev(head(var_b,40)$gene)) + theme_classic() + labs(title="Bcells") + scale_fill_manual(values=c("white","#619CFF","#00BA38","#F8766D")) 
+p2<-ggplot(data=var_b,aes(y=gene,x=value,group=variable,fill=variable))+geom_bar(stat='identity',colour="black",size=0.25)+scale_y_discrete(limits = rev(head(var_b,40)$gene)) + theme_classic() + labs(title="sc-C4") + scale_fill_manual(values=c("white","#619CFF","#00BA38","#F8766D")) 
 
 var_b$heritability<-NA
 var_b$heritability[which(var_b$gene %in% inh777)]<-1
@@ -198,7 +199,7 @@ var_t_subj<-var_t[var_t$variable=="Subject",]
 var_t_subj<-var_t_subj[order(var_t_subj$value, decreasing = T),]
 var_t<-rbind(var_t_subj,var_t[var_t$variable!="Subject",])
 var_t$variable<-factor(var_t$variable,levels=c("Residuals","Age","Sex","Subject"))
-p2<-ggplot(data=var_t,aes(y=gene,x=value,group=variable,fill=variable))+geom_bar(stat='identity',colour="black",size=0.25)+scale_y_discrete(limits = rev(head(var_t,40)$gene)) + theme_classic() + labs(title="Tcells") + scale_fill_manual(values=c("white","#619CFF","#00BA38","#F8766D")) 
+p2<-ggplot(data=var_t,aes(y=gene,x=value,group=variable,fill=variable))+geom_bar(stat='identity',colour="black",size=0.25)+scale_y_discrete(limits = rev(head(var_t,40)$gene)) + theme_classic() + labs(title="sc-C2") + scale_fill_manual(values=c("white","#619CFF","#00BA38","#F8766D")) 
 
 var_t$heritability<-NA
 var_t$heritability[which(var_t$gene %in% inh777)]<-1
@@ -219,7 +220,7 @@ var_n_subj<-var_n[var_n$variable=="Subject",]
 var_n_subj<-var_n_subj[order(var_n_subj$value, decreasing = T),]
 var_n<-rbind(var_n_subj,var_n[var_n$variable!="Subject",])
 var_n$variable<-factor(var_n$variable,levels=c("Residuals","Age","Sex","Subject"))
-p2<-ggplot(data=var_n,aes(y=gene,x=value,group=variable,fill=variable))+geom_bar(stat='identity',colour="black",size=0.25)+scale_y_discrete(limits = rev(head(var_n,40)$gene)) + theme_classic() + labs(title="C3") + scale_fill_manual(values=c("white","#619CFF","#00BA38","#F8766D")) 
+p2<-ggplot(data=var_n,aes(y=gene,x=value,group=variable,fill=variable))+geom_bar(stat='identity',colour="black",size=0.25)+scale_y_discrete(limits = rev(head(var_n,40)$gene)) + theme_classic() + labs(title="sc-C3") + scale_fill_manual(values=c("white","#619CFF","#00BA38","#F8766D")) 
 
 var_n$heritability<-NA
 var_n$heritability[which(var_n$gene %in% inh777)]<-1
@@ -240,7 +241,7 @@ var_m_subj<-var_m[var_m$variable=="Subject",]
 var_m_subj<-var_m_subj[order(var_m_subj$value, decreasing = T),]
 var_m<-rbind(var_m_subj,var_m[var_m$variable!="Subject",])
 var_m$variable<-factor(var_m$variable,levels=c("Residuals","Age","Sex","Subject"))
-p2<-ggplot(data=var_m,aes(y=gene,x=value,group=variable,fill=variable))+geom_bar(stat='identity',colour="black",size=0.25)+scale_y_discrete(limits = rev(head(var_m,40)$gene)) + theme_classic() + labs(title="Monocytes") + scale_fill_manual(values=c("white","#619CFF","#00BA38","#F8766D")) 
+p2<-ggplot(data=var_m,aes(y=gene,x=value,group=variable,fill=variable))+geom_bar(stat='identity',colour="black",size=0.25)+scale_y_discrete(limits = rev(head(var_m,40)$gene)) + theme_classic() + labs(title="sc-C1") + scale_fill_manual(values=c("white","#619CFF","#00BA38","#F8766D")) 
 
 var_m$heritability<-NA
 var_m$heritability[which(var_m$gene %in% inh777)]<-1
@@ -248,16 +249,16 @@ p1 <- ggplot(var_m, aes(x = 0,  y = gene, size=factor(heritability), color="red"
 pp4<-(p2 + theme(legend.position="none") | p1 + theme(legend.position="none")) + plot_layout(widths = c(10, 1))
 
 
-pdf("data/output/Bcell_cluster_top40.pdf")
+pdf("data/output/sc-C4_cluster_top40.pdf")
 pp1
 dev.off()
-pdf("data/output/Tcell_cluster_top40.pdf")
+pdf("data/output/sc-C2_cluster_top40.pdf")
 pp2
 dev.off()
-pdf("data/output/NKcell_cluster_top40.pdf")
+pdf("data/output/sc-C3_cluster_top40.pdf")
 pp3
 dev.off()
-pdf("data/output/Monocyte_cluster_top40.pdf")
+pdf("data/output/sc-C1_cluster_top40.pdf")
 pp4
 dev.off()
 

@@ -1,0 +1,85 @@
+configfile: "config.yaml"
+singularity: "file:///gpfs/gibbs/pi/csei/users/lb2336/r_scripts/envs/Nicaragua/nicaragua.sif" 
+
+rule all:    
+    input:
+        "data/output/NICA_batch2to4_new_timepoints_cleaned.rds",
+        "data/output/NICA_batch2to4_new_timepoints_cleaned_normalized.rds",
+        "data/output/NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_vpar.rds",
+        "data/output/NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_spline.rds",
+        "data/output/NICA_batch2to4_new_timepoints_limma_fgsea_simplified_age_results.rds",
+        "data/output/all_adult_pbulk_list_normalized.rds",
+        "data/output/age_subject_variance_VESlist_adult_old_aging_cohort.RDS",
+        "data/output/age_subject_variance_VESlist_adult_old_aging_cohort_renorm.RDS",
+        "data/output/NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_vpars_object.rds",
+        "data/output/NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_vpars_object_renorm.rds",
+        "data/output/NICA_batch2to4_new_timepoints_fsex_subject_enriched_with_labels.rds"
+
+rule export_pseudobulk:
+    input:
+        seurat_obj="data/input/seurat_object/NICAall_combined_manual_labeled_cleaned_final.rds"
+    output:
+        "data/output/NICA_batch2to4_new_timepoints_cleaned.rds"
+    script:
+        "scripts/export_pseudobulk.R"
+
+rule normalize_pseudobulk:
+    input:
+        pbulk_obj="data/output/NICA_batch2to4_new_timepoints_cleaned.rds"
+    output:
+        "data/output/NICA_batch2to4_new_timepoints_cleaned_normalized.rds"
+    script:
+        "scripts/normalize_and_batch_correct_pseudobulk.R"
+
+rule normalize_pseudobulk_adult_old:
+    input:
+        pbulk_folder="data/input/pseudobulk/pseudobulk_aging_cohort/"
+    output:
+        "data/output/all_adult_pbulk_list_normalized.rds"
+    script:
+        "scripts/normalize_and_batch_correct_pseudobulk_adult_old.R"
+
+rule fit_linear_models:
+    input:
+        pbulk_obj="data/output/NICA_batch2to4_new_timepoints_cleaned_normalized.rds"
+    output:
+        "data/output/NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_vpar.rds",
+        "data/output/NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_spline.rds"
+    script:
+        "scripts/fit_linear_models_pseudobulk.R"
+
+rule fit_linear_models_simplified:
+    input:
+        gene_sets="data/input/gene_sets/combined_gene_sets.RDS",
+        pbulk_obj="data/output/NICA_batch2to4_new_timepoints_cleaned_normalized.rds"
+    output:
+        "data/output/NICA_batch2to4_new_timepoints_limma_fgsea_simplified_age_results.rds"
+    script:
+        "scripts/fit_linear_models_pseudobulk_simplified.R"
+
+rule fit_linear_models_adult_old:
+    input:
+        pbulk_obj="data/output/all_adult_pbulk_list_normalized.rds"
+    output:
+        "data/output/age_subject_variance_VESlist_adult_old_aging_cohort.RDS"
+    script:
+        "scripts/fit_linear_models_pseudobulk_adult_old.R"
+
+rule enrich_and_renorm_vpar_results:
+    input:
+        vpars="data/output/NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_vpar.rds",
+        nrchd_genes="data/input/paper_supplementary_tables/supp_tables_S10.csv"
+    output:
+        "data/output/NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_vpars_object.rds",
+        "data/output/NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_vpars_object_renorm.rds",
+        "data/output/NICA_batch2to4_new_timepoints_fsex_subject_enriched_with_labels.rds"
+    script:
+        "scripts/enrich_and_renorm_vpar_results.R"
+
+rule renorm_vpar_results_adult_old:
+    input:
+        vpars="data/output/age_subject_variance_VESlist_adult_old_aging_cohort.RDS"
+    output:
+        "data/output/age_subject_variance_VESlist_adult_old_aging_cohort_renorm.RDS"
+    script:
+        "scripts/renorm_vpar_results_adult_old.R"
