@@ -7,6 +7,7 @@ channels:
   - r
 dependencies:
   - r-base=4.3.2
+  - conda-forge::rstudio-desktop
   - conda-forge::r-seurat=5.0.1
   - conda-forge::r-pheatmap=1.0.12
   - conda-forge::r-stringr=1.5.1
@@ -31,4 +32,5 @@ dependencies:
   - conda-forge::r-viridis=0.6.5
   - conda-forge::r-tidyverse=2.0.0
   - conda-forge::r-harmony=1.2.3
-  - bioconda::bioconductor-zellkonverter=1.12.1 
+  - bioconda::bioconductor-zellkonverter=1.12.1
+  - conda-forge::r-car=3.1.3 
