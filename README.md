@@ -31,6 +31,12 @@ If you are familiar with snakemake and simply want to recreate all figures in on
 
 ## Details on pre-processing and figure notebooks
 
+### Snakemake workflow to reproduce all preprocessing steps at once
+If you are familiar with snakemake and simply want to recreate all figures in one step, just run the follwing: \
+-> **GoTo:** preprocess_snakemake \
+-> **Data:** download all data from the zenodo repository into preprocess_sakemake/data/input/ \
+-> **Execution:**  ```snakemake --use-singularity```
+
 ### Pre-processing: Pseudobulk Generation from Single Cell Data
 -> **Data:** Download single cell RDS object from Zenodo: "NICAall_combined_manual_labeled_cleaned_final.rds" \
 -> **Code to run:** pseudobulk_processing/export_pseudobulk.R
