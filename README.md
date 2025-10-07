@@ -23,19 +23,32 @@ In the case of choosing one of the provided conda environments, also install the
 ### ImmuneAgeStability Rpackage
 This Rpackage provides a way to reproduce some of the analysis carried out in our study as described in the scripts below. In addition it also enables users to assess any of their own gene expression signatures for aspects of temporal stabilty during childhood. 
 
+## All-in-one snakemake workflows 
+
 ### Snakemake workflow to reproduce all figures at once
 If you are familiar with snakemake and simply want to recreate all figures in one step, just run the follwing: \
 -> **GoTo:** figures_snakemake \
 -> **Data:** download all data from the zenodo repository into figures_sakemake/data/input/ \
--> **Execution:**  ```snakemake --use-singularity```
-
-## Details on pre-processing and figure notebooks
+-> **Execution:**  \
+```snakemake --use-singularity```
 
 ### Snakemake workflow to reproduce all preprocessing steps at once
-If you are familiar with snakemake and simply want to recreate all figures in one step, just run the follwing: \
+If you are familiar with snakemake and simply want to recreate all preprocessing in one step apart from the individuality, just run the follwing: \
 -> **GoTo:** preprocess_snakemake \
 -> **Data:** download all data from the zenodo repository into preprocess_sakemake/data/input/ \
--> **Execution:**  ```snakemake --use-singularity```
+-> **Execution:**  \
+```snakemake --use-singularity```
+
+### Snakemake workflow to compute sliding window increasing and decreasing VES
+To re-compute the individuality scores - run the following separate snakemake workflow:
+-> **Data:** Download celltype divided pseudobulk RDS objects from Zenodo: "pseudobulk_per_celltype.zip" \
+-> **Data:** Download singularity image from Zenodo: "intrinsicness_0.1.sif" \
+-> **Prepare:** Extract celltype specific pseudobulk folder into incr_decr_variance/data/processed/ \
+-> **Code to run:** incr_decr_variance/Snakefile \
+-> **Example execution:** \
+```snakemake -j 16 --configfile config.yaml --use-singularity --executor slurm```
+
+## Details on pre-processing and figure notebooks
 
 ### Pre-processing: Pseudobulk Generation from Single Cell Data
 -> **Data:** Download single cell RDS object from Zenodo: "NICAall_combined_manual_labeled_cleaned_final.rds" \
@@ -48,14 +61,6 @@ If you are familiar with snakemake and simply want to recreate all figures in on
 ### Pre-processing: Age and Subject Variance Partitioning
 -> **Data:** Download normalized pseudobulk RDS object from Zenodo: "NICA_batch2to4_new_timepoints_cleaned_normalized.rds" \
 -> **Code to run:** pseudobulk_processing/fit_linear_models_pseudobulk.Rmd
-
-### Pre-processing: Increasing and Decreasing Subject Individuality
--> **Data:** Download celltype divided pseudobulk RDS objects from Zenodo: "pseudobulk_per_celltype.zip" \
--> **Data:** Download singularity image from Zenodo: "intrinsicness_0.1.sif" \
--> **Prepare:** Extract celltype specific pseudobulk folder into incr_decr_variance/data/processed/ \
--> **Code to run:** incr_decr_variance/Snakefile \
--> **Example execution:** \
-```snakemake -j 16 --configfile config.yaml --use-singularity --executor slurm```
 
 ### Pre-processing: Pseudobulk Generation in Adult Old Cohort (Terekhova et al, 2023)
 -> **Data:** Download public data set from synapse.org (syn49637038): "all_pbmcs_rna_harmony.h5ad" \
