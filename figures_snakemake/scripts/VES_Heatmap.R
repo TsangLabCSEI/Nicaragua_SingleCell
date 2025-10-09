@@ -95,6 +95,15 @@ p<-pheatmap(t(vpars_h), scale="none", clustering_distance_cols="correlation", cu
 # cut heatmap tree
 p_annot_l$clusterid<-cutree(p$tree_col, k = 4)
 
+#output ultrastable BTM genes
+ultrastab<-list()
+vpars_h<-as.data.frame(vpars_h)
+ultrastab$Bcells<-rownames(vpars_h[(vpars_h$B_Mem>=0.5) | (vpars_h$B_Naive>=0.5),])
+ultrastab$Tcells_CD8<-rownames(vpars_h[(vpars_h$CD8_Mem>=0.5) | (vpars_h$CD8_Naive>=0.5),])
+ultrastab$Tcells_CD4<-rownames(vpars_h[(vpars_h$CD4_Mem>=0.5) | (vpars_h$CD4_Naive>=0.5),])
+ultrastab$NKcells<-rownames(vpars_h[(vpars_h$NK_CD16hi>=0.5) | (vpars_h$NK_CD56hi>=0.5),])
+ultrastab$Monocytes<-rownames(vpars_h[(vpars_h$Mono_Classical>=0.5) | (vpars_h$Mono_NonClassical>=0.5),])
+saveRDS(ultrastab,"data/output/age_subject_variance_ultrastab.RDS")
 
 library(ComplexHeatmap)
 col_fun = colorRamp2(c(-0.5, 0, 1), c("blue", "#EBEBEB", "red"))
@@ -186,7 +195,7 @@ p1 <- ggplot(var_b, aes(x = 0,  y = gene, size=factor(heritability), color="red"
 pp1<-(p2 + theme(legend.position="none") | p1 + theme(legend.position="none")) + plot_layout(widths = c(10, 1))
 
 
-#var_t (Tcell dominated cluster)
+#var_t (NKcell dominated cluster)
 var_t<-vpars[vpars$gene %in% row.names(p_annot_l[which(p_annot_l$clusterid==2),]),]
 var_t<-var_t %>% group_by(gene) %>% dplyr::slice(which.max(subject_variance_explained)) %>% as.data.frame()
 var_t<-head(var_t[order(var_t$subject_variance_explained, decreasing = T),],40)
@@ -207,7 +216,7 @@ p1 <- ggplot(var_t, aes(x = 0,  y = gene, size=factor(heritability), color="red"
 pp2<-(p2 + theme(legend.position="none") | p1 + theme(legend.position="none")) + plot_layout(widths = c(10, 1))
 
 
-#var_n (NKcell dominated cluster)
+#var_n (Tcell dominated cluster)
 var_n<-vpars[vpars$gene %in% row.names(p_annot_l[which(p_annot_l$clusterid==3),]),]
 var_n<-var_n %>% group_by(gene) %>% dplyr::slice(which.max(subject_variance_explained)) %>% as.data.frame()
 var_n<-head(var_n[order(var_n$subject_variance_explained, decreasing = T),],40)

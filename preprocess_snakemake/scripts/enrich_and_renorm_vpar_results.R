@@ -43,7 +43,7 @@ saveRDS(enrichment_df,"data/output/NICA_batch2to4_new_timepoints_fsex_subject_en
 
 #renorm vpars by taking out batch variance
 
-sc_varpart <- vpars %>% mutate(var_bio_sum = subject_variance_explained + age_variance_explained + residual_variance_explained) %>% mutate(ves_renorm = subject_variance_explained / var_bio_sum, vea_renorm= age_variance_explained / var_bio_sum, res_renorm=residual_variance_explained / var_bio_sum)
-sc_varpart<-sc_varpart[c("ves_renorm","vea_renorm","res_renorm","celltype","gene")]
-colnames(sc_varpart)<-c("subject_variance_explained","age_variance_explained","residual_variance_explained","celltype","gene")
+sc_varpart <- vpars %>% mutate(var_bio_sum = subject_variance_explained + sex_variance_explained + age_variance_explained + residual_variance_explained) %>% mutate(ves_renorm = subject_variance_explained / var_bio_sum, vex_renorm= sex_variance_explained / var_bio_sum, vea_renorm= age_variance_explained / var_bio_sum, res_renorm=residual_variance_explained / var_bio_sum)
+sc_varpart<-sc_varpart[c("ves_renorm","vex_renorm","vea_renorm","res_renorm","celltype","gene")]
+colnames(sc_varpart)<-c("subject_variance_explained","sex_variance_explained","age_variance_explained","residual_variance_explained","celltype","gene")
 saveRDS(sc_varpart,"data/output/NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_vpars_object_renorm.rds")

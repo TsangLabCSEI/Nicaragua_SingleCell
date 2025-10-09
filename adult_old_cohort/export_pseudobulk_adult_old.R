@@ -1,5 +1,7 @@
 library(Seurat)
 library(zellkonverter)
+source("pseudobulk_pooling_functions.R")
+
 
 #adult cohort raw count data loading example myecells
 sce <- readH5AD("all_pbmcs_rna_harmony.h5ad")
