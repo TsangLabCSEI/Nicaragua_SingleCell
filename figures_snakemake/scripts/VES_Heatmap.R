@@ -66,9 +66,9 @@ for (p in names(ledge_list)){
       p_annot<-as.numeric(rownames(vpars_h) %in% ledge_list[["M61.0_enriched in NK cells (II)"]] | rownames(vpars_h) %in% ledge_list[["M7.2_enriched in NK cells (I)"]])
       p="M7.2_M61_enriched in NK cells (I/II)"
     }
-    if(str_detect(p,"M11") | str_detect(p,"M118")){
-      p_annot<-as.numeric(rownames(vpars_h) %in% ledge_list[["M11.0_enriched in monocytes (II)"]] | rownames(vpars_h) %in% ledge_list[["M118.0_enriched in monocytes (IV)"]])
-      p="M11_M118_enriched in monocytes (II/IV)"
+    if(str_detect(p,"M11") | str_detect(p,"M118") | str_detect(p,"M81")){
+	          p_annot<-as.numeric(rownames(vpars_h) %in% ledge_list[["M11.0_enriched in monocytes (II)"]] | rownames(vpars_h) %in% ledge_list[["M118.0_enriched in monocytes (IV)"]])
+          p="M11_M81_M118_enriched in monocytes (II/IV)"
     }
     if(str_detect(p,"M69") | str_detect(p,"M47") | str_detect(p,"M47.2")){
       p_annot<-as.numeric(rownames(vpars_h) %in% ledge_list[["M47.0_enriched in B cells (I)"]] | rownames(vpars_h) %in% ledge_list[["M47.2_enriched in B cells (III)"]] | rownames(vpars_h) %in% ledge_list[["M69_enriched in B cells (VI)"]])
@@ -95,15 +95,6 @@ p<-pheatmap(t(vpars_h), scale="none", clustering_distance_cols="correlation", cu
 # cut heatmap tree
 p_annot_l$clusterid<-cutree(p$tree_col, k = 4)
 
-#output ultrastable BTM genes
-ultrastab<-list()
-vpars_h<-as.data.frame(vpars_h)
-ultrastab$Bcells<-rownames(vpars_h[(vpars_h$B_Mem>=0.5) | (vpars_h$B_Naive>=0.5),])
-ultrastab$Tcells_CD8<-rownames(vpars_h[(vpars_h$CD8_Mem>=0.5) | (vpars_h$CD8_Naive>=0.5),])
-ultrastab$Tcells_CD4<-rownames(vpars_h[(vpars_h$CD4_Mem>=0.5) | (vpars_h$CD4_Naive>=0.5),])
-ultrastab$NKcells<-rownames(vpars_h[(vpars_h$NK_CD16hi>=0.5) | (vpars_h$NK_CD56hi>=0.5),])
-ultrastab$Monocytes<-rownames(vpars_h[(vpars_h$Mono_Classical>=0.5) | (vpars_h$Mono_NonClassical>=0.5),])
-saveRDS(ultrastab,"data/output/age_subject_variance_ultrastab.RDS")
 
 library(ComplexHeatmap)
 col_fun = colorRamp2(c(-0.5, 0, 1), c("blue", "#EBEBEB", "red"))
@@ -127,7 +118,7 @@ col_fun17 = colorRamp2(c(-0.5, 0, 1), c("black", "#EBEBEB", "blue"))
 col_fun18 = colorRamp2(c(-0.5, 0, 1), c("black", "#EBEBEB", "black"))
 col_fun19 = colorRamp2(c(-0.5, 0, 1), c("black", "#EBEBEB", "darksalmon"))
 
-col_list<-list("HERITABILITY (continuous h2 value)"=col_fun,"HERITABILITY (Wright et al.,Nature Genetics 2014)"=col_fun1,"M146_MHC-TLR7-TLR8 cluster"=col_fun2,"M47_M47.2_M69_enriched in B cells (I/III/VI)"=col_fun3,"S2_B cell surface signature"=col_fun4,"M5.0_regulation of antigen presentation and immune response"=col_fun5,"M37.0_immune activation - generic cluster"=col_fun6,"M7.2_M61_enriched in NK cells (I/II)"=col_fun7,"M37.1_enriched in neutrophils (I)"=col_fun8,"M7.0_enriched in T cells (I)"=col_fun9,"M7.1_T cell activation (I)"=col_fun10,"M16_TLR and inflammatory signaling"=col_fun11,"M32.1_platelet activation (II)"=col_fun12,"M5.1_T cell activation and signaling"=col_fun13,"M11_M118_enriched in monocytes (II/IV)"=col_fun14,"S4_Monocyte surface signature"=col_fun15,"M4.3_myeloid cell enriched receptors and transporters"=col_fun16,"M2.0_M2.1_extracellular matrix (I/II)"=col_fun17,"M4.0_cell cycle and transcription"=col_fun18,"M49_transcription regulation in cell development"=col_fun19)
+col_list<-list("HERITABILITY (continuous h2 value)"=col_fun,"HERITABILITY (Wright et al.,Nature Genetics 2014)"=col_fun1,"M146_MHC-TLR7-TLR8 cluster"=col_fun2,"M47_M47.2_M69_enriched in B cells (I/III/VI)"=col_fun3,"S2_B cell surface signature"=col_fun4,"M5.0_regulation of antigen presentation and immune response"=col_fun5,"M37.0_immune activation - generic cluster"=col_fun6,"M7.2_M61_enriched in NK cells (I/II)"=col_fun7,"M37.1_enriched in neutrophils (I)"=col_fun8,"M7.0_enriched in T cells (I)"=col_fun9,"M7.1_T cell activation (I)"=col_fun10,"M16_TLR and inflammatory signaling"=col_fun11,"M32.1_platelet activation (II)"=col_fun12,"M5.1_T cell activation and signaling"=col_fun13,"M11_M81_M118_enriched in monocytes (II/IV)"=col_fun14,"S4_Monocyte surface signature"=col_fun15,"M4.3_myeloid cell enriched receptors and transporters"=col_fun16,"M2.0_M2.1_extracellular matrix (I/II)"=col_fun17,"M4.0_cell cycle and transcription"=col_fun18,"M49_transcription regulation in cell development"=col_fun19)
 
 vpars_h_c1<-vpars_h[p_annot_l$clusterid==1,]
 p_annot_l_c1<-p_annot_l[p_annot_l$clusterid==1,]
@@ -195,7 +186,7 @@ p1 <- ggplot(var_b, aes(x = 0,  y = gene, size=factor(heritability), color="red"
 pp1<-(p2 + theme(legend.position="none") | p1 + theme(legend.position="none")) + plot_layout(widths = c(10, 1))
 
 
-#var_t (NKcell dominated cluster)
+#var_t (Tcell dominated cluster)
 var_t<-vpars[vpars$gene %in% row.names(p_annot_l[which(p_annot_l$clusterid==2),]),]
 var_t<-var_t %>% group_by(gene) %>% dplyr::slice(which.max(subject_variance_explained)) %>% as.data.frame()
 var_t<-head(var_t[order(var_t$subject_variance_explained, decreasing = T),],40)
@@ -216,7 +207,7 @@ p1 <- ggplot(var_t, aes(x = 0,  y = gene, size=factor(heritability), color="red"
 pp2<-(p2 + theme(legend.position="none") | p1 + theme(legend.position="none")) + plot_layout(widths = c(10, 1))
 
 
-#var_n (Tcell dominated cluster)
+#var_n (NKcell dominated cluster)
 var_n<-vpars[vpars$gene %in% row.names(p_annot_l[which(p_annot_l$clusterid==3),]),]
 var_n<-var_n %>% group_by(gene) %>% dplyr::slice(which.max(subject_variance_explained)) %>% as.data.frame()
 var_n<-head(var_n[order(var_n$subject_variance_explained, decreasing = T),],40)
