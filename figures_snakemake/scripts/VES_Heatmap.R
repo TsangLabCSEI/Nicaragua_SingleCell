@@ -103,7 +103,7 @@ ultrastab$Tcells_CD8<-rownames(vpars_h[(vpars_h$CD8_Mem>=0.5) | (vpars_h$CD8_Nai
 ultrastab$Tcells_CD4<-rownames(vpars_h[(vpars_h$CD4_Mem>=0.5) | (vpars_h$CD4_Naive>=0.5),])
 ultrastab$NKcells<-rownames(vpars_h[(vpars_h$NK_CD16hi>=0.5) | (vpars_h$NK_CD56hi>=0.5),])
 ultrastab$Monocytes<-rownames(vpars_h[(vpars_h$Mono_Classical>=0.5) | (vpars_h$Mono_NonClassical>=0.5),])
-saveRDS(ultrastab,"/gpfs/gibbs/pi/csei/users/lb2336/r_scripts/Nicaragua_SingleCell/preprocess_snakemake/data/output/age_subject_variance_ultrastab.RDS")
+saveRDS(ultrastab,"data/output/age_subject_variance_ultrastab.RDS")
 
 
 library(ComplexHeatmap)
