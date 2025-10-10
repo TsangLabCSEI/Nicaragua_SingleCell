@@ -38,7 +38,7 @@ If you are familiar with snakemake and simply want to recreate all preprocessing
 ```snakemake --use-singularity```
 
 ### Snakemake workflow to compute sliding window increasing and decreasing VES
-To re-compute the individuality scores - run the following separate snakemake workflow:
+To re-compute the individuality scores - run the following separate snakemake workflow: \
 -> **Data:** Download celltype divided pseudobulk RDS objects from Zenodo: "pseudobulk_per_celltype.zip" \
 -> **Data:** Download singularity image from Zenodo: "intrinsicness_0.1.sif" \
 -> **Prepare:** Extract celltype specific pseudobulk folder into incr_decr_variance/data/processed/ \
