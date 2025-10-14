@@ -27,6 +27,7 @@ This Rpackage provides a way to reproduce some of the analysis carried out in ou
 If you are familiar with snakemake and simply want to recreate all figures in one step, just run the follwing: \
 -> **GoTo:** figures_snakemake \
 -> **Data:** download all data from the zenodo repository into figures_sakemake/data/input/ \
+-> **Data:** Edit path to singularity image from Zenodo: "nicaragua.sif" \
 -> **Execution:**  \
 ```snakemake --use-singularity```
 
@@ -34,6 +35,7 @@ If you are familiar with snakemake and simply want to recreate all figures in on
 If you are familiar with snakemake and simply want to recreate all preprocessing in one step apart from the individuality, just run the follwing: \
 -> **GoTo:** preprocess_snakemake \
 -> **Data:** download all data from the zenodo repository into preprocess_sakemake/data/input/ \
+-> **Data:** Edit path to singularity image from Zenodo: "nicaragua.sif" \
 -> **Execution:**  \
 ```snakemake --use-singularity```
 
