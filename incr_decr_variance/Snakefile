@@ -13,20 +13,18 @@ rule all:
 #sliding window analysis --------------------------------------
 
 WINDOWS = []
-AGE_GROUPS = [1,2,3]
 
-# [3,9] + 6
 
-for i in range(2,3):
+for i in range(2,9):
     WINDOWS.append(str(i) + "to" + str(i + 5))
 
 BOOT_ITER = range(0,10) 
 
 rule make_window_subsets_rm_cells:
     input:
-        "data/processed/NICA_batch2to4_new_normalized_{celltype}.rds", #celltype=CELLTYPES) ### not sure what is this
+        "data/processed/NICA_batch2to4_new_normalized_{celltype}.rds", 
     output:
-        "data/analysis_out/variancePartition/sliding_age_window/subsetted_vst_ctrl_cells_{celltype}/age_{window}_vst.rds", #window = WINDOWS, celltype=CELLTYPES)
+        "data/analysis_out/variancePartition/sliding_age_window/subsetted_vst_ctrl_cells_{celltype}/age_{window}_vst.rds", 
     params:
         celltype = lambda wildcards: wildcards.celltype,
         window = lambda wildcards: wildcards.window
@@ -35,7 +33,7 @@ rule make_window_subsets_rm_cells:
 
 rule run_varpart_window_jacknife:
     input:
-        "data/analysis_out/variancePartition/sliding_age_window/subsetted_vst_ctrl_cells_{celltype}/age_{window}_vst.rds", # window = WINDOWS, celltype=CELLTYPES)
+        "data/analysis_out/variancePartition/sliding_age_window/subsetted_vst_ctrl_cells_{celltype}/age_{window}_vst.rds", 
     output:
         "data/analysis_out/variancePartition/age_sliding_window_bootstrap/varpart_objects/window_{window}_celltype-{celltype}_boot-{boot}_varpart.rds",
         "data/analysis_out/variancePartition/age_sliding_window_bootstrap/metadata_subsets/window_{window}_celltype-{celltype}_boot-{boot}_meta.tsv",
