@@ -190,9 +190,10 @@ var_b<-rbind(var_b_subj,var_b[var_b$variable!="Subject",])
 var_b$variable<-factor(var_b$variable,levels=c("Residuals","Age","Sex","Subject"))
 p2<-ggplot(data=var_b,aes(y=gene,x=value,group=variable,fill=variable))+geom_bar(stat='identity',colour="black",size=0.25)+scale_y_discrete(limits = rev(head(var_b,40)$gene)) + theme_classic() + labs(title="sc-C4") + scale_fill_manual(values=c("white","#619CFF","#00BA38","#F8766D")) 
 
-var_b$heritability<-NA
-var_b$heritability[which(var_b$gene %in% inh777)]<-1
-p1 <- ggplot(var_b, aes(x = 0,  y = gene, size=factor(heritability), color="red")) +geom_point()+scale_y_discrete(limits = rev(head(var_b,40)$gene)) +theme_minimal() + theme(axis.text = element_blank(), axis.title = element_blank(),panel.grid = element_blank())
+var_b$heritability<-0
+var_b$heritability[which(var_b$gene %in% inh_grouped$gene.symbol)]<-1
+var_b$heritability[which(var_b$gene %in% inh777)]<-2
+p1 <- ggplot(var_b, aes(x = 0,  y = gene, shape=factor(heritability))) + geom_point(aes(colour=factor(heritability)))+scale_color_manual(values=c("black","white","#F8766D"))+scale_y_discrete(limits = rev(head(var_b,40)$gene)) +theme_minimal() + theme(axis.text = element_blank(), axis.title = element_blank(),panel.grid = element_blank()) + scale_shape_manual(values=c(4,26,19))
 pp1<-(p2 + theme(legend.position="none") | p1 + theme(legend.position="none")) + plot_layout(widths = c(10, 1))
 
 
@@ -211,9 +212,10 @@ var_t<-rbind(var_t_subj,var_t[var_t$variable!="Subject",])
 var_t$variable<-factor(var_t$variable,levels=c("Residuals","Age","Sex","Subject"))
 p2<-ggplot(data=var_t,aes(y=gene,x=value,group=variable,fill=variable))+geom_bar(stat='identity',colour="black",size=0.25)+scale_y_discrete(limits = rev(head(var_t,40)$gene)) + theme_classic() + labs(title="sc-C2") + scale_fill_manual(values=c("white","#619CFF","#00BA38","#F8766D")) 
 
-var_t$heritability<-NA
-var_t$heritability[which(var_t$gene %in% inh777)]<-1
-p1 <- ggplot(var_t, aes(x = 0,  y = gene, size=factor(heritability), color="red")) +geom_point()+scale_y_discrete(limits = rev(head(var_t,40)$gene)) +theme_minimal() + theme(axis.text = element_blank(), axis.title = element_blank(),panel.grid = element_blank())
+var_t$heritability<-0
+var_t$heritability[which(var_t$gene %in% inh_grouped$gene.symbol)]<-1
+var_t$heritability[which(var_t$gene %in% inh777)]<-2
+p1 <- ggplot(var_t, aes(x = 0,  y = gene, shape=factor(heritability))) + geom_point(aes(colour=factor(heritability)))+scale_color_manual(values=c("black","white","#F8766D"))+scale_y_discrete(limits = rev(head(var_t,40)$gene)) +theme_minimal() + theme(axis.text = element_blank(), axis.title = element_blank(),panel.grid = element_blank()) + scale_shape_manual(values=c(4,26,19))
 pp2<-(p2 + theme(legend.position="none") | p1 + theme(legend.position="none")) + plot_layout(widths = c(10, 1))
 
 
@@ -232,9 +234,10 @@ var_n<-rbind(var_n_subj,var_n[var_n$variable!="Subject",])
 var_n$variable<-factor(var_n$variable,levels=c("Residuals","Age","Sex","Subject"))
 p2<-ggplot(data=var_n,aes(y=gene,x=value,group=variable,fill=variable))+geom_bar(stat='identity',colour="black",size=0.25)+scale_y_discrete(limits = rev(head(var_n,40)$gene)) + theme_classic() + labs(title="sc-C3") + scale_fill_manual(values=c("white","#619CFF","#00BA38","#F8766D")) 
 
-var_n$heritability<-NA
-var_n$heritability[which(var_n$gene %in% inh777)]<-1
-p1 <- ggplot(var_n, aes(x = 0,  y = gene, size=factor(heritability), color="red")) +geom_point()+scale_y_discrete(limits = rev(head(var_n,40)$gene)) +theme_minimal() + theme(axis.text = element_blank(), axis.title = element_blank(),panel.grid = element_blank())
+var_n$heritability<-0
+var_n$heritability[which(var_n$gene %in% inh_grouped$gene.symbol)]<-1
+var_n$heritability[which(var_n$gene %in% inh777)]<-2
+p1 <- ggplot(var_n, aes(x = 0,  y = gene, shape=factor(heritability))) + geom_point(aes(colour=factor(heritability)))+scale_color_manual(values=c("black","white","#F8766D"))+scale_y_discrete(limits = rev(head(var_n,40)$gene)) +theme_minimal() + theme(axis.text = element_blank(), axis.title = element_blank(),panel.grid = element_blank()) + scale_shape_manual(values=c(4,26,19))
 pp3<-(p2 + theme(legend.position="none") | p1 + theme(legend.position="none")) + plot_layout(widths = c(10, 1))
 
 
@@ -253,9 +256,10 @@ var_m<-rbind(var_m_subj,var_m[var_m$variable!="Subject",])
 var_m$variable<-factor(var_m$variable,levels=c("Residuals","Age","Sex","Subject"))
 p2<-ggplot(data=var_m,aes(y=gene,x=value,group=variable,fill=variable))+geom_bar(stat='identity',colour="black",size=0.25)+scale_y_discrete(limits = rev(head(var_m,40)$gene)) + theme_classic() + labs(title="sc-C1") + scale_fill_manual(values=c("white","#619CFF","#00BA38","#F8766D")) 
 
-var_m$heritability<-NA
-var_m$heritability[which(var_m$gene %in% inh777)]<-1
-p1 <- ggplot(var_m, aes(x = 0,  y = gene, size=factor(heritability), color="red")) +geom_point()+scale_y_discrete(limits = rev(head(var_m,40)$gene)) +theme_minimal() + theme(axis.text = element_blank(), axis.title = element_blank(),panel.grid = element_blank())
+var_m$heritability<-0
+var_m$heritability[which(var_m$gene %in% inh_grouped$gene.symbol)]<-1
+var_m$heritability[which(var_m$gene %in% inh777)]<-2
+p1 <- ggplot(var_m, aes(x = 0,  y = gene, shape=factor(heritability))) + geom_point(aes(colour=factor(heritability)))+scale_color_manual(values=c("white","#F8766D"))+scale_y_discrete(limits = rev(head(var_m,40)$gene)) +theme_minimal() + theme(axis.text = element_blank(), axis.title = element_blank(),panel.grid = element_blank()) + scale_shape_manual(values=c(26,19))
 pp4<-(p2 + theme(legend.position="none") | p1 + theme(legend.position="none")) + plot_layout(widths = c(10, 1))
 
 
