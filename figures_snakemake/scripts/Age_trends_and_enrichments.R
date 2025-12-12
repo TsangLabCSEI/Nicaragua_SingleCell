@@ -97,6 +97,16 @@ ggplot(
   aes(x=timepoints, y=value,color=celltype)) + stat_smooth(geom='line', alpha=0.25, se=FALSE) + stat_smooth(data=data3[which(data3$celltype %in% c("B_Naive","B_Mem","CD4_Naive","CD4_Mem","CD8_Mem","CD8_Naive","MAIT","gdT_Vd1","gdT_Vd2","Mono_Classical","NK_CD16hi")),], geom='line', se=FALSE) + theme_classic()+ theme(text = element_text(size=15)) + scale_x_continuous(limits=c(3, 14),breaks=seq(3,14,2))+ggtitle("C3: Steroid response module across celltypes")+theme(legend.position = "none")
 ggsave("data/output/C3_STRD_AgeTrend.pdf")
 
+data3<-data3[!is.na(data3$value),]
+cor.list<-list()
+for (ct in unique(data3$celltype)){
+    model<-augment(loess(value ~ timepoints, data = data3[data3$celltype==ct,]),data3[data3$celltype==ct,])
+    cor.list[[ct]]<-cor.test(model$timepoints,model$.fitted,method = "spearman")$p.value
+    if(cor.list[[ct]]<=0.05){
+        print(ct)
+    }
+}
+print(cor.list)
 
 ### Correlation analysis of bulk cluster 5 gene module with age across celltypes
 cluster_tt_means<-list()
@@ -144,6 +154,16 @@ ggplot(
   aes(x=timepoints, y=value,color=celltype)) + stat_smooth(geom='line', alpha=0.25, se=FALSE, span=1) + stat_smooth(data=data3[which(data3$celltype %in% c("B_Naive","B_Mem","CD4_Naive","CD4_Mem","CD8_Naive","CD8_Mem","cDC","MAIT","gdT_Vd1","gdT_Vd2","Mono_Classical","Mono_NonClassical","NK_CD16hi")),], geom='line', se=FALSE, span=1) + theme_classic()+ theme(text = element_text(size=15)) + scale_x_continuous(limits=c(3, 14),breaks=seq(3,14,2))+ggtitle("C5: IFN response module across celltypes")+theme(legend.position = "none")
 ggsave("data/output/C5_INF_AgeTrend.pdf")
 
+data3<-data3[!is.na(data3$value),]
+cor.list<-list()
+for (ct in unique(data3$celltype)){
+    model<-augment(loess(value ~ timepoints, data = data3[data3$celltype==ct,]),data3[data3$celltype==ct,])
+    cor.list[[ct]]<-cor.test(model$timepoints,model$.fitted,method = "spearman")$p.value
+    if(cor.list[[ct]]<=0.05){
+        print(ct)
+    }
+}
+print(cor.list)
 
 # Simplified age model results
 fgsea_list<-readRDS(snakemake@input[["fgsea_simpl"]])
