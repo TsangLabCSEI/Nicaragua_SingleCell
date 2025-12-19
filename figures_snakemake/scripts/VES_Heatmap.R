@@ -177,6 +177,7 @@ vpars<-vpars[c("batch_variance_explained","subject_variance_explained","sex_vari
 
 #var_b (Bcell dominated cluster)
 var_b<-vpars[vpars$gene %in% row.names(p_annot_l[which(p_annot_l$clusterid==4),]),]
+var_b<-var_b[var_b$celltype=="B_Mem",]
 var_b<-var_b %>% group_by(gene) %>% dplyr::slice(which.max(subject_variance_explained)) %>% as.data.frame()
 var_b<-head(var_b[order(var_b$subject_variance_explained, decreasing = T),],40)
 colnames(var_b)<-c("batch","Subject","Sex","Residuals","Age","celltype","gene")
@@ -188,7 +189,8 @@ var_b_subj<-var_b[var_b$variable=="Subject",]
 var_b_subj<-var_b_subj[order(var_b_subj$value, decreasing = T),]
 var_b<-rbind(var_b_subj,var_b[var_b$variable!="Subject",])
 var_b$variable<-factor(var_b$variable,levels=c("Residuals","Age","Sex","Subject"))
-p2<-ggplot(data=var_b,aes(y=gene,x=value,group=variable,fill=variable))+geom_bar(stat='identity',colour="black",size=0.25)+scale_y_discrete(limits = rev(head(var_b,40)$gene)) + theme_classic() + labs(title="sc-C4") + scale_fill_manual(values=c("white","#619CFF","#00BA38","#F8766D")) 
+var_b$celltype<-"B_Mem"
+p2<-ggplot(data=var_b,aes(y=gene,x=value,group=variable,fill=variable))+geom_bar(stat='identity',colour="black",size=0.25)+scale_y_discrete(limits = rev(head(var_b,40)$gene)) + theme_classic() + labs(title="sc-C4") + scale_fill_manual(values=c("white","#619CFF","#00BA38","#F8766D")) +facet_wrap(vars(celltype))
 
 var_b$heritability<-0
 var_b$heritability[which(var_b$gene %in% inh_grouped$gene.symbol)]<-1
@@ -199,6 +201,7 @@ pp1<-(p2 + theme(legend.position="none") | p1 + theme(legend.position="none")) +
 
 #var_t (NKcell dominated cluster)
 var_t<-vpars[vpars$gene %in% row.names(p_annot_l[which(p_annot_l$clusterid==2),]),]
+var_t<-var_t[var_t$celltype=="NK_CD16hi",]
 var_t<-var_t %>% group_by(gene) %>% dplyr::slice(which.max(subject_variance_explained)) %>% as.data.frame()
 var_t<-head(var_t[order(var_t$subject_variance_explained, decreasing = T),],40)
 colnames(var_t)<-c("batch","Subject","Sex","Residuals","Age","celltype","gene")
@@ -210,7 +213,8 @@ var_t_subj<-var_t[var_t$variable=="Subject",]
 var_t_subj<-var_t_subj[order(var_t_subj$value, decreasing = T),]
 var_t<-rbind(var_t_subj,var_t[var_t$variable!="Subject",])
 var_t$variable<-factor(var_t$variable,levels=c("Residuals","Age","Sex","Subject"))
-p2<-ggplot(data=var_t,aes(y=gene,x=value,group=variable,fill=variable))+geom_bar(stat='identity',colour="black",size=0.25)+scale_y_discrete(limits = rev(head(var_t,40)$gene)) + theme_classic() + labs(title="sc-C2") + scale_fill_manual(values=c("white","#619CFF","#00BA38","#F8766D")) 
+var_t$celltype<-"NK_CD16hi"
+p2<-ggplot(data=var_t,aes(y=gene,x=value,group=variable,fill=variable))+geom_bar(stat='identity',colour="black",size=0.25)+scale_y_discrete(limits = rev(head(var_t,40)$gene)) + theme_classic() + labs(title="sc-C2") + scale_fill_manual(values=c("white","#619CFF","#00BA38","#F8766D")) +facet_wrap(vars(celltype))
 
 var_t$heritability<-0
 var_t$heritability[which(var_t$gene %in% inh_grouped$gene.symbol)]<-1
@@ -221,6 +225,7 @@ pp2<-(p2 + theme(legend.position="none") | p1 + theme(legend.position="none")) +
 
 #var_n (Tcell dominated cluster)
 var_n<-vpars[vpars$gene %in% row.names(p_annot_l[which(p_annot_l$clusterid==3),]),]
+var_n<-var_n[var_n$celltype=="CD8_Mem",]
 var_n<-var_n %>% group_by(gene) %>% dplyr::slice(which.max(subject_variance_explained)) %>% as.data.frame()
 var_n<-head(var_n[order(var_n$subject_variance_explained, decreasing = T),],40)
 colnames(var_n)<-c("batch","Subject","Sex","Residuals","Age","celltype","gene")
@@ -232,7 +237,8 @@ var_n_subj<-var_n[var_n$variable=="Subject",]
 var_n_subj<-var_n_subj[order(var_n_subj$value, decreasing = T),]
 var_n<-rbind(var_n_subj,var_n[var_n$variable!="Subject",])
 var_n$variable<-factor(var_n$variable,levels=c("Residuals","Age","Sex","Subject"))
-p2<-ggplot(data=var_n,aes(y=gene,x=value,group=variable,fill=variable))+geom_bar(stat='identity',colour="black",size=0.25)+scale_y_discrete(limits = rev(head(var_n,40)$gene)) + theme_classic() + labs(title="sc-C3") + scale_fill_manual(values=c("white","#619CFF","#00BA38","#F8766D")) 
+var_n$celltype<-"CD8_Mem"
+p2<-ggplot(data=var_n,aes(y=gene,x=value,group=variable,fill=variable))+geom_bar(stat='identity',colour="black",size=0.25)+scale_y_discrete(limits = rev(head(var_n,40)$gene)) + theme_classic() + labs(title="sc-C3") + scale_fill_manual(values=c("white","#619CFF","#00BA38","#F8766D")) +facet_wrap(vars(celltype))
 
 var_n$heritability<-0
 var_n$heritability[which(var_n$gene %in% inh_grouped$gene.symbol)]<-1
@@ -243,6 +249,7 @@ pp3<-(p2 + theme(legend.position="none") | p1 + theme(legend.position="none")) +
 
 #var_m (Monocyte dominated cluster)
 var_m<-vpars[vpars$gene %in% row.names(p_annot_l[which(p_annot_l$clusterid==1),]),]
+var_m<-var_m[var_m$celltype=="Mono_Classical",]
 var_m<-var_m %>% group_by(gene) %>% dplyr::slice(which.max(subject_variance_explained)) %>% as.data.frame()
 var_m<-head(var_m[order(var_m$subject_variance_explained, decreasing = T),],40)
 colnames(var_m)<-c("batch","Subject","Sex","Residuals","Age","celltype","gene")
@@ -254,7 +261,8 @@ var_m_subj<-var_m[var_m$variable=="Subject",]
 var_m_subj<-var_m_subj[order(var_m_subj$value, decreasing = T),]
 var_m<-rbind(var_m_subj,var_m[var_m$variable!="Subject",])
 var_m$variable<-factor(var_m$variable,levels=c("Residuals","Age","Sex","Subject"))
-p2<-ggplot(data=var_m,aes(y=gene,x=value,group=variable,fill=variable))+geom_bar(stat='identity',colour="black",size=0.25)+scale_y_discrete(limits = rev(head(var_m,40)$gene)) + theme_classic() + labs(title="sc-C1") + scale_fill_manual(values=c("white","#619CFF","#00BA38","#F8766D")) 
+var_m$celltype<-"Mono_Classical"
+p2<-ggplot(data=var_m,aes(y=gene,x=value,group=variable,fill=variable))+geom_bar(stat='identity',colour="black",size=0.25)+scale_y_discrete(limits = rev(head(var_m,40)$gene)) + theme_classic() + labs(title="sc-C1") + scale_fill_manual(values=c("white","#619CFF","#00BA38","#F8766D"))+facet_wrap(vars(celltype)) 
 
 var_m$heritability<-0
 var_m$heritability[which(var_m$gene %in% inh_grouped$gene.symbol)]<-1
