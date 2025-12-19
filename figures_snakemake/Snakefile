@@ -28,8 +28,8 @@ rule all:
         "data/output/Old_Age_Correlations_TopGenes.pdf",
         "data/output/AdultOld_Age_Correlations_Boxplot.pdf",
         "data/output/IFN-stability_trend_explicit_monocytes.pdf",
-        "data/output/IFN-stability_trend_explicit_monocytes_genes.pdf"
-
+        "data/output/IFN-stability_trend_explicit_monocytes_genes.pdf",
+        "data/output/GEX_VES_Correlations.pdf"
 rule VES_Heatmap:
     input:
         nrchd_gene_df="data/input/paper_supplementary_tables/supp_tables_S10.csv",
@@ -98,3 +98,11 @@ rule individuals_and_UMAP:
     script:
         "scripts/Individuals_and_UMAP.R"
 
+rule gex_correlation:
+    input:
+        data="data/input/pseudobulk/NICA_batch2to4_new_timepoints_cleaned_normalized.rds",
+        vpars="data/input/variance_partition_results/NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_vpars_object.rds"
+    output:
+        "data/output/GEX_VES_Correlations.pdf"
+    script:
+        "scripts/GEX_correlations.R"
