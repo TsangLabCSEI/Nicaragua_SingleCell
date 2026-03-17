@@ -16,27 +16,25 @@ library(scales)
 
 # load data
 pbulk_data<-read.csv(snakemake@input[["data"]])
+sigs<-ImmuneAgeStability::baseline_signatures[c("IHM","IFN","ia_bcell","iaa","GPR56highvslow_CD8_EM_sig","DE_CD29hi_CD8_genes")]
+names(sigs)<-c("IHM","IFN","IAB B-cell","IAA","CD8 VM GPR56hi","CD8 VM CD29hi")
 
 #get background genes
 background_genes_list<-list()
 for (ct in names(pbulk_data)){
   print(ct)
   emat <- pbulk_data[[ct]]$counts
-  
   gene_means <- apply(emat, 1, mean)
   gene_sds <- apply(emat, 1, sd)
-  
   gene_vars <- gene_sds
   
   n <- 5
   
   stopifnot(identical(names(gene_means), names(gene_sds)))
   mat <- cbind(scale(gene_sds), scale(gene_means))
-  #rownames(mat) <- names(gene_vars)
-  
   dist_mat <- as.matrix(dist(mat))
   
-  background_genes <- lapply(all_sigs, function(sig_genes){
+  background_genes <- lapply(sigs, function(sig_genes){
     print("starting")
     names(sig_genes) <- sig_genes
     topn_closest <- lapply(sig_genes, function(gene){
@@ -48,17 +46,13 @@ for (ct in names(pbulk_data)){
   })
   
   background_unlist <- unique(unlist(background_genes, use.names = F))
-  
-  background_unlist <- setdiff(background_unlist, unlist(all_sigs_sub))
-  
+  background_unlist <- setdiff(background_unlist, unlist(sigs))
   background_genes_list[[ct]]<-background_unlist
 }
 
 background_genes_list$bulk<-ImmuneAgeStability::baseline_signatures$background_bulk
 
 #visualize subject variance partitioning for selected immune response signatures
-sigs<-ImmuneAgeStability::baseline_signatures[c("IHM","IFN","ia_bcell","iaa","GPR56highvslow_CD8_EM_sig","DE_CD29hi_CD8_genes")]
-names(sigs)<-c("IHM","IFN","IAB B-cell","IAA","CD8 VM GPR56hi","CD8 VM CD29hi")
 multisignature_stability_df<-ImmuneAgeStability::compute_multisignature_stability(sigs)
 
 background_stability_df<-ImmuneAgeStability::compute_multisignature_stability(background_genes_list)
