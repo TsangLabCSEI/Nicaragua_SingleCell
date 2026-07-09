@@ -20,7 +20,6 @@ rule all:
         "data/output/sc-C3_cluster_top40.pdf",
         "data/output/sc-C4_cluster_top40.pdf",
         "data/output/signature_stability_heatmap.pdf",
-        "data/output/Background-stability_trend.pdf",
         "data/output/IAB-Bcell-stability_trend.pdf",
         "data/output/IFN-stability_trend.pdf",
         "data/output/CD8_VM_GPR56hi-stability_trend.pdf",
@@ -29,9 +28,7 @@ rule all:
         "data/output/Old_Age_Correlations_TopGenes.pdf",
         "data/output/AdultOld_Age_Correlations_Boxplot.pdf",
         "data/output/IFN-stability_trend_explicit_monocytes.pdf",
-        "data/output/IFN-stability_trend_explicit_monocytes_genes.pdf",
-        "data/output/GEX_VES_correlations.pdf"
-
+        "data/output/IFN-stability_trend_explicit_monocytes_genes.pdf"
 
 rule VES_Heatmap:
     input:
@@ -46,23 +43,14 @@ rule VES_Heatmap:
         "data/output/sc-C2_cluster_top40.pdf",
         "data/output/sc-C3_cluster_top40.pdf",
         "data/output/sc-C4_cluster_top40.pdf",
-    script:
-        "scripts/VES_Heatmap.R"
-
-
-rule VES_signatures:
-    input:
-        data="data/input/pseudobulk/NICA_batch2to4_new_timepoints_cleaned_normalized.rds"
-    output:
         "data/output/signature_stability_heatmap.pdf",
-        "data/output/Background-stability_trend.pdf",
         "data/output/IAB-Bcell-stability_trend.pdf",
         "data/output/IFN-stability_trend.pdf",
         "data/output/CD8_VM_GPR56hi-stability_trend.pdf",
         "data/output/IFN-stability_trend_explicit_monocytes.pdf",
         "data/output/IFN-stability_trend_explicit_monocytes_genes.pdf"
     script:
-        "scripts/VES_signatures.R"
+        "scripts/VES_Heatmap.R"
 
 
 rule Age_trends_and_enrichments:
@@ -110,11 +98,3 @@ rule individuals_and_UMAP:
     script:
         "scripts/Individuals_and_UMAP.R"
 
-rule gex_correlation:
-    input:
-        data="data/input/pseudobulk/NICA_batch2to4_new_timepoints_cleaned_normalized.rds",
-        vpars="data/input/variance_partition_results/NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_vpars_object.rds"
-    output:
-        "data/output/GEX_VES_correlations.pdf"
-    script:
-        "scripts/GEX_correlations.R"
