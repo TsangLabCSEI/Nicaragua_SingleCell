@@ -11,8 +11,6 @@ library(stringr)
 # load single cell seurat object
 dataset.query <- readRDS(snakemake@input[["data"]]) 
 prots<-rownames(dataset.query)[!(str_detect(rownames(dataset.query),"iso")|str_detect(rownames(dataset.query),"Iso"))]
-dataset.query <- dataset.query[prots,]
-dataset.query <- dataset.query[,dataset.query$manual.cid!="doublets"]
 
 
 # vizualize UMAP
@@ -59,21 +57,16 @@ nica.celltypes$gender<-as.vector(t(data.frame(sapply(rownames(nica.celltypes),fu
 
 #visualize distribution of timepoints per individual
 age_df<-nica.celltypes[c("individual","timepoint","gender")]
-age_df<-age_df[age_df$individual!="nica4416",]
-age_df<-age_df %>% group_by(individual,gender) %>% summarise_at(vars(timepoint),list(max = max, min=min))
-age_df<-as.data.frame(age_df)
-age_df$V3<-age_df$max - age_df$min
-age_df<-age_df[order(age_df$V3, decreasing = T),]
-age_df$idx<-seq(1,15)
+age_df<-age_df %>% group_by(individual) %>% mutate(min=min(timepoint),max=max(timepoint)) %>% ungroup()
+age_df<-age_df[order(age_df$timepoint,age_df$max-age_df$min, decreasing = F),]
+age_df$idx<-as.numeric(factor(age_df$individual,levels=unique(age_df$individual)))
 age_df %>%
-    ggplot(aes(x = idx, col=gender)) +
-    geom_linerange(aes(ymin = min, ymax = max, x = idx),
-                   size = 1.5, alpha = 0.25) +
-    geom_point(aes(y = min)) +
-    geom_point(aes(y = max)) +
-    coord_flip() +
-    ylab("Followed age range") +
-    theme_bw(base_size = 15) +
-    theme(axis.title.y = element_blank(), legend.position = c(0.8, 0.85), legend.background = element_rect(fill = NA)) + scale_y_continuous(breaks = seq(3,17,2))+ scale_x_continuous(breaks = seq(1,15,1)) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(), legend.title=element_text(size=14))
+    ggplot(aes(x=timepoint, y = idx, col=gender, group=idx)) +
+    geom_point() + 
+    geom_line() + 
+    theme_bw() + 
+    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank()) +
+    scale_x_continuous(breaks = seq(1,20,1)) +
+    xlab("Followed age range")
 ggsave("data/output/individuals.pdf")
 

@@ -15,7 +15,7 @@ library(scales)
 
 
 # load data
-pbulk_data<-read.csv(snakemake@input[["data"]])
+pbulk_data<-readRDS(snakemake@input[["data"]])
 sigs<-ImmuneAgeStability::baseline_signatures[c("IHM","IFN","ia_bcell","iaa","GPR56highvslow_CD8_EM_sig","DE_CD29hi_CD8_genes")]
 names(sigs)<-c("IHM","IFN","IAB B-cell","IAA","CD8 VM GPR56hi","CD8 VM CD29hi")
 
@@ -60,7 +60,7 @@ background_stability_df<-background_stability_df[background_stability_df$celltyp
 background_stability_df$signature<-"Background"
 
 stability_df<-rbind(background_stability_df,multisignature_stability_df)
-pdf("data/output/signature_stability_heatmap.pdf")
+pdf("data/output/signature_stability_heatmap.pdf",height=5, width=12)
 ImmuneAgeStability::plot_signature_stability_heatmap(stability_df)
 dev.off()
 

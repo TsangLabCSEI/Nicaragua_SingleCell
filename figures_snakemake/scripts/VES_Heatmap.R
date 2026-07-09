@@ -39,7 +39,7 @@ for (i in seq(1,nrow(nrchd_gene_df))){
 # reformat subject variance data
 ledge<-unique(unlist(enrichment_df$leadingEdge))
 vpars_h<-vpars[c("subject_variance_explained","celltype","gene")]
-vpars_h<-vpars_h[which(!(vpars_h$celltype %in% c("ILC","doublets"))),]
+vpars_h<-vpars_h[which(!(vpars_h$celltype %in% c("ILC","doublets","T_Platelet_bind","T_DN"))),]
 vpars_h<-reshape(vpars_h, idvar = "gene", timevar = "celltype", direction = "wide")
 vpars_h[is.na(vpars_h)]<-0
 genes<-vpars_h$gene
@@ -78,8 +78,9 @@ for (p in names(ledge_list)){
       p_annot<-as.numeric(rownames(vpars_h) %in% ledge_list[["M2.0_extracellular matrix (I)"]] | rownames(vpars_h) %in% ledge_list[["M2.1_extracellular matrix (II)"]])
       p="M2.0_M2.1_extracellular matrix (I/II)"
     }
-
-    p_annot_l[[p]]<-p_annot
+    if(!(str_detect(p,"M51"))){
+      p_annot_l[[p]]<-p_annot
+    }
 }
 p_annot_l<-as.data.frame(do.call(cbind,p_annot_l))
 rownames(p_annot_l)<-rownames(vpars_h)
@@ -98,11 +99,20 @@ p_annot_l$clusterid<-cutree(p$tree_col, k = 4)
 #output ultrastable BTM genes
 ultrastab<-list()
 vpars_h<-as.data.frame(vpars_h)
-ultrastab$Bcells<-rownames(vpars_h[(vpars_h$B_Mem>=0.5) | (vpars_h$B_Naive>=0.5),])
-ultrastab$Tcells_CD8<-rownames(vpars_h[(vpars_h$CD8_Mem>=0.5) | (vpars_h$CD8_Naive>=0.5),])
-ultrastab$Tcells_CD4<-rownames(vpars_h[(vpars_h$CD4_Mem>=0.5) | (vpars_h$CD4_Naive>=0.5),])
-ultrastab$NKcells<-rownames(vpars_h[(vpars_h$NK_CD16hi>=0.5) | (vpars_h$NK_CD56hi>=0.5),])
-ultrastab$Monocytes<-rownames(vpars_h[(vpars_h$Mono_Classical>=0.5) | (vpars_h$Mono_NonClassical>=0.5),])
+ultrastab$B_Naive<-rownames(vpars_h[(vpars_h$B_Naive>=0.5),])
+ultrastab$CD8_Naive<-rownames(vpars_h[(vpars_h$CD8_Naive>=0.5),])
+ultrastab$CD4_Naive<-rownames(vpars_h[(vpars_h$CD4_Naive>=0.5),])
+ultrastab$NK_CD16hi<-rownames(vpars_h[(vpars_h$NK_CD16hi>=0.5),])
+ultrastab$Mono_Classical<-rownames(vpars_h[(vpars_h$Mono_Classical>=0.5),])
+ultrastab$B_Mem<-rownames(vpars_h[(vpars_h$B_Mem>=0.5),])
+ultrastab$CD8_EM<-rownames(vpars_h[(vpars_h$CD8_EM>=0.5),])
+ultrastab$CD8_TEMRA<-rownames(vpars_h[(vpars_h$CD8_TEMRA>=0.5),])
+ultrastab$CD4_CM<-rownames(vpars_h[(vpars_h$CD4_CM>=0.5),])
+ultrastab$CD4_Treg<-rownames(vpars_h[(vpars_h$CD4_Treg>=0.5),])
+ultrastab$NK_CD56hiCD16lo<-rownames(vpars_h[(vpars_h$NK_CD56hiCD16lo>=0.5),])
+ultrastab$Mono_NonClassical<-rownames(vpars_h[(vpars_h$Mono_NonClassical>=0.5),])
+ultrastab$pDC<-rownames(vpars_h[(vpars_h$pDC>=0.5),])
+ultrastab$cDC<-rownames(vpars_h[(vpars_h$cDC>=0.5),])
 saveRDS(ultrastab,"data/output/age_subject_variance_ultrastab.RDS")
 
 
@@ -166,7 +176,7 @@ mat = t(vpars_h_c1)
 column_ha = HeatmapAnnotation(df = p_annot_l_c1, col = col_list, na_col = "black", show_legend = F)
 h4<-Heatmap(mat, name = "scVES", top_annotation = column_ha, col = magma(100), cluster_columns=F, cluster_rows=F,show_column_names=F, column_title = "C4")
 
-pdf("data/output/VES_Heatmap.pdf",width=12,height=7)
+pdf("data/output/VES_Heatmap.pdf",width=12,height=9)
 h1+h2+h3+h4
 dev.off()
 
@@ -176,8 +186,8 @@ p_annot_l$clusterid<-cutree(p$tree_col, k = 4)[rownames(vpars_h)]
 vpars<-vpars[c("batch_variance_explained","subject_variance_explained","sex_variance_explained","residual_variance_explained","age_variance_explained","celltype","gene")]
 
 #var_b (Bcell dominated cluster)
-var_b<-vpars[vpars$gene %in% row.names(p_annot_l[which(p_annot_l$clusterid==4),]),]
-var_b<-var_b[var_b$celltype=="B_Mem",]
+var_b<-vpars[vpars$gene %in% row.names(p_annot_l[which(p_annot_l$clusterid==2),]),]
+var_b<-var_b[var_b$celltype=="CD8_Naive",]
 var_b<-var_b %>% group_by(gene) %>% dplyr::slice(which.max(subject_variance_explained)) %>% as.data.frame()
 var_b<-head(var_b[order(var_b$subject_variance_explained, decreasing = T),],40)
 colnames(var_b)<-c("batch","Subject","Sex","Residuals","Age","celltype","gene")
@@ -189,7 +199,7 @@ var_b_subj<-var_b[var_b$variable=="Subject",]
 var_b_subj<-var_b_subj[order(var_b_subj$value, decreasing = T),]
 var_b<-rbind(var_b_subj,var_b[var_b$variable!="Subject",])
 var_b$variable<-factor(var_b$variable,levels=c("Residuals","Age","Sex","Subject"))
-var_b$celltype<-"B_Mem"
+var_b$celltype<-"CD8_Naive"
 p2<-ggplot(data=var_b,aes(y=gene,x=value,group=variable,fill=variable))+geom_bar(stat='identity',colour="black",size=0.25)+scale_y_discrete(limits = rev(head(var_b,40)$gene)) + theme_classic() + labs(title="sc-C4") + scale_fill_manual(values=c("white","#619CFF","#00BA38","#F8766D")) +facet_wrap(vars(celltype))
 
 var_b$heritability<-0
@@ -200,7 +210,7 @@ pp1<-(p2 + theme(legend.position="none") | p1 + theme(legend.position="none")) +
 
 
 #var_t (NKcell dominated cluster)
-var_t<-vpars[vpars$gene %in% row.names(p_annot_l[which(p_annot_l$clusterid==2),]),]
+var_t<-vpars[vpars$gene %in% row.names(p_annot_l[which(p_annot_l$clusterid==4),]),]
 var_t<-var_t[var_t$celltype=="NK_CD16hi",]
 var_t<-var_t %>% group_by(gene) %>% dplyr::slice(which.max(subject_variance_explained)) %>% as.data.frame()
 var_t<-head(var_t[order(var_t$subject_variance_explained, decreasing = T),],40)
@@ -225,7 +235,7 @@ pp2<-(p2 + theme(legend.position="none") | p1 + theme(legend.position="none")) +
 
 #var_n (Tcell dominated cluster)
 var_n<-vpars[vpars$gene %in% row.names(p_annot_l[which(p_annot_l$clusterid==3),]),]
-var_n<-var_n[var_n$celltype=="CD8_Mem",]
+var_n<-var_n[var_n$celltype=="B_Mem",]
 var_n<-var_n %>% group_by(gene) %>% dplyr::slice(which.max(subject_variance_explained)) %>% as.data.frame()
 var_n<-head(var_n[order(var_n$subject_variance_explained, decreasing = T),],40)
 colnames(var_n)<-c("batch","Subject","Sex","Residuals","Age","celltype","gene")
@@ -237,7 +247,7 @@ var_n_subj<-var_n[var_n$variable=="Subject",]
 var_n_subj<-var_n_subj[order(var_n_subj$value, decreasing = T),]
 var_n<-rbind(var_n_subj,var_n[var_n$variable!="Subject",])
 var_n$variable<-factor(var_n$variable,levels=c("Residuals","Age","Sex","Subject"))
-var_n$celltype<-"CD8_Mem"
+var_n$celltype<-"B_Mem"
 p2<-ggplot(data=var_n,aes(y=gene,x=value,group=variable,fill=variable))+geom_bar(stat='identity',colour="black",size=0.25)+scale_y_discrete(limits = rev(head(var_n,40)$gene)) + theme_classic() + labs(title="sc-C3") + scale_fill_manual(values=c("white","#619CFF","#00BA38","#F8766D")) +facet_wrap(vars(celltype))
 
 var_n$heritability<-0

@@ -15,20 +15,9 @@ ultrastab_clust_vpars<-readRDS(snakemake@input[["ultrastab_clust_vpars"]])
 age_corr_list<-list()
 age_corrp_list<-list()
 
-for (ct in names(nind_list)){
+for (ct in intersect(unique(ultrastab_clust_vpars$celltype),names(nind_list))){
   print(ct)
   ultra<-ultrastab[[ct]]
-  if (ct=="Monocytes"){
-    ct.sub<-c("Mono_Classical","Mono_NonClassical")
-  } else if (ct=="Bcells"){
-    ct.sub<-c("B_Naive","B_Mem")
-  } else if (ct=="NKcells"){
-    ct.sub<-c("NK_CD16hi","NK_CD56hi")
-  } else if (ct=="Tcells_CD4"){
-    ct.sub<-c("CD4_Naive","CD4_Mem")
-  } else if (ct=="Tcells_CD8"){
-    ct.sub<-c("CD8_Naive","CD8_Mem")
-  }
   for (age in c("Adult","Old")){
    print(age)
    pseudo.sce.list<-nind_list[[ct]]
@@ -47,7 +36,7 @@ for (ct in names(nind_list)){
    df_nind<-df_nind[which(!is.na(df_nind))]
    df_nind_adult<-df_nind
     
-   ultrastab_clust_vpars_ct<-ultrastab_clust_vpars[ultrastab_clust_vpars$celltype==ct.sub[1] | ultrastab_clust_vpars$celltype==ct.sub[2],]
+   ultrastab_clust_vpars_ct<-ultrastab_clust_vpars[ultrastab_clust_vpars$celltype==ct,]
    ultrastab_clust_vpars_ct<-as.data.frame(ultrastab_clust_vpars_ct %>% group_by(gene) %>% summarize(max(subject_variance_explained)))
    colnames(ultrastab_clust_vpars_ct)<-c("gene","subject_variance_explained")
    rownames(ultrastab_clust_vpars_ct)<-ultrastab_clust_vpars_ct$gene
@@ -80,9 +69,10 @@ for (ct in names(nind_list)){
 age_corr_list_df<-do.call(rbind,age_corr_list)
 age_corrp_list_df<-as.data.frame(do.call(rbind,age_corrp_list))
 colnames(age_corrp_list_df)<-c("rho","p-val","pearson","slope","celltype","age")
+age_corrp_list_df<-age_corrp_list_df[age_corrp_list_df$celltype %in% c("Mono_Classical","CD8_EM","CD8_TEMRA","CD8_Naive"),]
 age_corr_list_df$ct_age_grp<-paste0(age_corr_list_df$celltype,"-",age_corr_list_df$age_group)
-age_corr_list_df$ct_age_grp_fct<-factor(age_corr_list_df$ct_age_grp,levels=c("Bcells-Adult","Monocytes-Adult","NKcells-Adult","Tcells_CD4-Adult","Tcells_CD8-Adult","Bcells-Old","Monocytes-Old","NKcells-Old","Tcells_CD4-Old","Tcells_CD8-Old"))
-age_corr_list_df.filt<-age_corr_list_df[age_corr_list_df$ct_age_grp %in% c("Monocytes-Adult","Monocytes-Old","Tcells_CD8-Adult","Tcells_CD8-Old"),]
+age_corr_list_df.filt<-age_corr_list_df[age_corr_list_df$ct_age_grp %in% c("Mono_Classical-Adult","CD8_EM-Adult","Mono_Classical-Old","CD8_EM-Old"),]
+age_corr_list_df.filt$ct_age_grp_fct<-factor(age_corr_list_df.filt$ct_age_grp,levels=c("Mono_Classical-Adult","CD8_EM-Adult","Mono_Classical-Old","CD8_EM-Old"))
 ggplot(data=age_corr_list_df.filt[age_corr_list_df.filt$ultra=="normal",],aes(y=adult,x=young)) + geom_point(colour="black") + geom_density_2d(bins=150) + geom_abline(intercept = 0, slope = 1, color="blue", lwd=1) + geom_point(data=age_corr_list_df.filt[age_corr_list_df.filt$ultra=="ultrastab",],aes(y=adult,x=young), colour="red") + geom_smooth(method="lm",formula=y~x+0, se=F, lty=2, color="orange", lwd=1) + facet_wrap(vars(ct_age_grp_fct),nrow = 2) + theme_light()
 ggsave("data/output/AdultOld_Age_Correlations.pdf")
 
@@ -101,8 +91,18 @@ ggsave("data/output/Old_Age_Correlations_TopGenes.pdf")
 
 
 ### Aging cohort: Young / Adult / Old VES boxplots
-
-age_corr_list_df_ed<-readRDS(snakemake@input[["age_corr_list_df_ed"]])
-ggplot(data=age_corr_list_df_ed[(age_corr_list_df_ed$ultra=="ultrastab"),],aes(x=celltype,y=adult,fill=age_group))+geom_boxplot()+theme_bw() + geom_point(shape=1, position = position_jitterdodge(jitter.width = 0.1), alpha=0.25) + ylab("VES [ultrastable genes]")
-ggsave("data/output/AdultOld_Age_Correlations_Boxplot.pdf")
+print("boxplots")
+#age_corr_list_df_ed<-readRDS(snakemake@input[["age_corr_list_df_ed"]])
+age_corr_list_df_ed<-age_corr_list_df
+age_corr_list_df_ed<-age_corr_list_df_ed[age_corr_list_df_ed$age_group=="Adult",]
+age_corr_list_df_ed$adult<-age_corr_list_df_ed$young
+age_corr_list_df_ed$young<-NULL
+age_corr_list_df_ed<-age_corr_list_df_ed[c("adult","age_group","gene","celltype","ultra")]
+age_corr_list_df_ed$age_group<-"Young"
+age_corr_list_df_ed<-rbind(age_corr_list_df[c("adult","age_group","gene","celltype","ultra")],age_corr_list_df_ed)
+age_corr_list_df_ed$age_group<-factor(age_corr_list_df_ed$age_group,levels=c("Young","Adult","Old"))
+ggplot(data=age_corr_list_df_ed[(age_corr_list_df_ed$ultra=="ultrastab"),],aes(x=celltype,y=adult,fill=age_group))+geom_boxplot()+theme_bw() + geom_point(shape=1, position = position_jitterdodge(jitter.width = 0.1), alpha=0.25) + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + ylab("VES [ultrastable genes]")
+ggsave("data/output/AdultOld_Age_Correlations_Boxplot.pdf",width = 10)
+ggplot(data=age_corr_list_df_ed,aes(x=celltype,y=adult,fill=age_group))+geom_violin(scale="width",draw_quantiles = c(0.25, 0.5, 0.75))+theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + ylab("VES [all genes]")
+ggsave("data/output/AdultOld_Age_Correlations_Boxplot_all.pdf",width = 10)
 

@@ -5,6 +5,7 @@ set.seed(4)
 library(dplyr)
 library(ggplot2)
 library(stringr)
+library(ggpubr)
 
 # load pbulk and vpars tables
 dge <- readRDS(snakemake@input[["data"]]) 
