@@ -17,7 +17,8 @@ pseudobulk_list_normalized <- list()
 for (i in list.files(snakemake@input[["pbulk_folder"]],pattern="adults.*.rds")){
   cat(i,"-\n")
   path<-paste0(snakemake@input[["pbulk_folder"]],"/",i)
-  eset <- readRDS(path)$SeuratProject
+  eset <- readRDS(path)
+  eset <- eset[[names(eset)]]
   geneExpr <- eset$counts
   sample.info <- eset$samples
   sample.info$sample.id <- paste0(sample.info$Donor_id,".",sample.info$Age)

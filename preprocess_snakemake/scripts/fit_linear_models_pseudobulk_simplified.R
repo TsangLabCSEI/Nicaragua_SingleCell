@@ -11,7 +11,8 @@ fit_list <- lapply(pbulk, function(dge){
   meta <- dge$samples %>%
     select(matched.individual, matched.timepoint.age) %>%
     rename(age = matched.timepoint.age, subject = matched.individual)
-  
+ 
+  meta$age <- as.numeric(meta$age) 
   design <- model.matrix(~age + subject, meta)
   
   v <- voom(dge, design = design)
@@ -40,4 +41,4 @@ fgsea_list <- lapply(toptab_list, function(toptab){
                     minSize=15)
 })
 
-saveRDS(fgsea_list, "data/output/NICA_batch2to4_new_timepoints_limma_fgsea_simplified_age_results.rds")
+saveRDS(fgsea_list, "data/output/NICA_batch1to4_new_timepoints_limma_fgsea_simplified_age_results.rds")

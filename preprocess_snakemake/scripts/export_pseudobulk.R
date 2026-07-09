@@ -5,7 +5,7 @@ source("scripts/pseudobulk_pooling_functions.R")
 
 
 dataset.all <- readRDS(snakemake@input[["seurat_obj"]])
-DGELISTS_OUT_PATH <- "data/output/NICA_batch2to4_new_timepoints_cleaned.rds"
+DGELISTS_OUT_PATH <- "data/output/NICA_batch1to4_new_timepoints_cleaned.rds"
 
 #Parameters for pseudobulk pooling
 LIBSIZE_FILTER <- 0

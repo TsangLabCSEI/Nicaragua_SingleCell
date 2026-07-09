@@ -15,7 +15,7 @@ var.threshold <- 1
 pseudobulk_list<-readRDS(snakemake@input[["pbulk_obj"]])
 pseudobulk_list_normalized <- list()
 
-DGELISTS_OUT_PATH <- "data/output/NICA_batch2to4_new_timepoints_cleaned_normalized.rds"
+DGELISTS_OUT_PATH <- "data/output/NICA_batch1to4_new_timepoints_cleaned_normalized.rds"
 
 
 #iterate over raw pseudobulk pooled data and run normalization and batch correction

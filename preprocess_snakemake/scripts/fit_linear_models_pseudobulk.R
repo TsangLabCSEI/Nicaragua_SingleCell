@@ -39,13 +39,13 @@ for (a in c(str_split_i(snakemake@input[["pbulk_obj"]],"\\.",1))){
     meta$age.months <- as.numeric(meta$matched.timepoint.age)*12
     meta$batch <- factor(meta$batch)
     
-    X <- elspline(meta$age.months, n = 8)
+    X <- elspline(meta$age.months, n = 4)
     
-    for(i in 1:8){
+    for(i in 1:4){
       meta[[paste0("X", i)]] <- X[,i]
     }
     
-    form <- ~ (1|matched.individual) + X1 + X2 + X3 + X4 + X5 + X6 + X7 + X8 + (1 | batch) + gender 
+    form <- ~ (1|matched.individual) + X1 + X2 + X3 + X4 + (1 | batch) + gender 
     
     # estimate weights using linear mixed model of dream
     print("estimate weights using linear mixed model of dream")
