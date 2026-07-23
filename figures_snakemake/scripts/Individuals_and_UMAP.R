@@ -37,7 +37,9 @@ for (i in unique(dataset.query$matched.individual)){
     dataset.t<-dataset.i[,which(dataset.i$matched.timepoint.age==t)]
     b<-unique(dataset.t$batch)
     g<-unique(dataset.t$gender)
-    nica_list[[paste0(i,"_",t,"_",b,"_",g)]]<-table(dataset.t$manual.cid)
+    if (sum(tab)>100){
+      nica_list[[paste0(i,"_",t,"_",b,"_",g)]]<-table(dataset.t$manual.cid)
+    }
   }
 }
 
