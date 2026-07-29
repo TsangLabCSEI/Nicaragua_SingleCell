@@ -82,15 +82,13 @@ ImmuneAgeStability::plot_signature_stability_bars(stability_slope_df)
 dev.off()
 
 background_gene_VES<-list()
-for(ct in names(background_genes_list)){
+for(ct in names(ImmuneAgeStability::gene_stability)){
   print(ct)
   background_gene_VES[[ct]]<-compute_signature_stability_slope(signature_name = ct, signature = background_genes_list[[ct]])
 }
 background_gene_VES_df<-do.call(rbind,background_gene_VES)
 background_gene_VES_df<-background_gene_VES_df[background_gene_VES_df$celltype==background_gene_VES_df$signature,]
 background_gene_VES_df$signature<-"Background"
-select_celltypes<-c("bulk","B_Mem","B_Naive","CD4_Mem","CD4_Naive","CD8_Mem","CD8_Naive","NK_CD16hi","Mono_Classical","Mono_NonClassical","gdT_Vd1","gdT_Vd2","MAIT","pDC")
-background_gene_VES_df <- background_gene_VES_df %>% filter(celltype %in% select_celltypes) %>% mutate(celltype = factor(celltype, levels = select_celltypes)) %>% arrange(celltype)
 pdf("data/output/Background-stability_trend.pdf")
 plot_signature_stability_bars(background_gene_VES_df)
 dev.off()
