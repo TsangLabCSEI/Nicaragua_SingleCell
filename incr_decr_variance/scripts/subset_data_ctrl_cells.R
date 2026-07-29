@@ -14,6 +14,7 @@ vst <- readRDS(vst_IN_PATH)
 
 #vst <- vst[, vst$Sample.type == "case"]
 meta <- as.data.frame(vst$samples)
+meta$matched.timepoint.age <- as.numeric(meta$matched.timepoint.age)
 
 min_age_mo <- min(meta$matched.timepoint.age)
 max_age_mo <- max(meta$matched.timepoint.age)
