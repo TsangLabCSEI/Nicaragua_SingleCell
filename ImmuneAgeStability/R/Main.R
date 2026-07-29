@@ -96,7 +96,7 @@ plot_signature_stability<-function(signature_name,signature_stability_df){
 #' @return heatmap
 #' @export
 plot_signature_stability_heatmap<-function(multisignature_stability_df){
-  celltypes<-c("bulk","B_Mem","B_Naive","CD4_Mem","CD4_Naive","CD8_Mem","CD8_Naive","ILC","MAIT","gdT_Vd1","gdT_Vd2","Mono_Classical","Mono_NonClassical","NK_CD16hi","NK_CD56hi","cDC","pDC")
+  celltypes<-c("bulk","B_Mem_CD11c","B_Mem","B_Naive","CD4_CM","CD4_EM","CD4_Naive","CD4_Treg","CD4_Th1","CD8_EM","CD8_SCM_like","CD8_TEMRA","CD8_Naive","ILC","MAIT","gdT_Vd1","gdT_Vd2","Mono_Classical","Mono_NonClassical","NK_CD16hi","NK_CD56hiCD16lo","NK_proliferating","NKT_like","cDC","pDC","T_DN","T_Platelet_bind")
   multisignature_stability_df$celltype<-factor(multisignature_stability_df$celltype, levels=celltypes)
   ggplot(data=multisignature_stability_df[multisignature_stability_df$celltype!="ILC",],aes(y=signature,x=celltype,fill=subject_variance))+geom_tile()  + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + scale_fill_viridis_c(option = "magma")
 }
