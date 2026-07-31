@@ -1,3 +1,6 @@
+library(GEOquery)
+library("hgu219.db")
+library(AnnotationDbi)
 library(dplyr)
 library(ggplot2)
 library(ggrepel)
@@ -5,7 +8,13 @@ library(ggpubr)
 library(edgeR)
 library(limma)
 library(stringr)
+library(lme4)
+library(lmerTest)
+library(variancePartition)
+library(tibble)
+library(fgsea)
 
+options(timeout = 600)
 
 # load pbulk and vpars tables
 dge <- readRDS(snakemake@input[["bulk"]])
@@ -125,6 +134,7 @@ exprs_data_flt<-exprs_mat[,rownames(pheno_data_short)]
 pheno_data_short_plt<-pheno_data_short
 pheno_data_short_plt$age.years<-pheno_data_short_plt$`age at sample (months):ch1`/12
 ggplot(pheno_data_short_plt,aes(x=age.years,y=sample_name,color=`gender:ch1`))+geom_point()+theme_bw()+scale_x_continuous(breaks = seq(1,20,2))+theme(legend.title = element_blank())
+ggsave("data/output/T1D_Finnish_control_cohort.pdf")
 
 fit_gene_wise <- function(dge){
   data<-dge[c("GEX","Sex","Age","Subject")]
@@ -148,6 +158,10 @@ df_varp<-do.call(rbind,gene_list)
 df_varp<-as.data.frame(df_varp)
 df_varp$Gene<-rownames(df_varp)
 
+df_varp_mltd<-reshape2::melt(df_varp)
+ggplot(df_varp_mltd,aes(x=variable,y=value,fill=variable))+geom_violin(scale = "width")+theme_bw()
+ggsave("data/output/T1D_Finnish_control_cohort_VESviolin.pdf")
+
 
 bulkVES <- read.csv(snakemake@input[["vpars"]])
 rownames(bulkVES)<-bulkVES$Gene
@@ -157,6 +171,7 @@ df_varp<-df_varp[genes,]
 df_varp_mltd<-reshape2::melt(df_varp)
 df_varp$Subject.NICA<-bulkVES$Subject.ID
 ggplot(df_varp,aes(x=Subject,y=Subject.NICA,label=Gene))+geom_point()+geom_abline(intercept = 0, slope = 1, color="blue", lwd=1) + geom_label_repel(data=df_varp[(df_varp$Subject>0.6)&(df_varp$Subject.NICA>0.6),],max.overlaps = 100)+geom_density_2d(bins=100)+ theme_bw()+stat_cor(method = "spearman")
+ggsave("data/output/T1D_Finnish_control_cohort_VES.pdf")
 
 
 ### Finnish linear model
@@ -209,3 +224,5 @@ fgsea_dat %>%
   ggtitle("Age-trajectories - FINN cohort") +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+
+ggsave("data/output/T1D_Finnish_control_cohort_AgeTrajectories.pdf")

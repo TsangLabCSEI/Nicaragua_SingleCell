@@ -20,6 +20,7 @@ rule all:
         "data/output/sc-C3_cluster_top40.pdf",
         "data/output/sc-C4_cluster_top40.pdf",
         "data/output/signature_stability_heatmap.pdf",
+        "data/output/Background-stability_trend.pdf",
         "data/output/IAB-Bcell-stability_trend.pdf",
         "data/output/IFN-stability_trend.pdf",
         "data/output/CD8_VM_GPR56hi-stability_trend.pdf",
@@ -28,13 +29,25 @@ rule all:
         "data/output/Old_Age_Correlations_TopGenes.pdf",
         "data/output/AdultOld_Age_Correlations_Boxplot.pdf",
         "data/output/IFN-stability_trend_explicit_monocytes.pdf",
-        "data/output/IFN-stability_trend_explicit_monocytes_genes.pdf"
+        "data/output/IFN-stability_trend_explicit_monocytes_genes.pdf",
+        "data/output/GEX_VES_correlations.pdf",
+        "data/output/proteomics_cohort_overview.pdf",
+        "data/output/proteomics_variance_partition.pdf",
+        "data/output/proteomics_variance_partition_genes.pdf",
+        "data/output/proteomics_science_correlation.pdf",
+        "data/output/snapshot_NICAage6_corr.pdf",
+        "data/output/snapshot_EUCLIDS_corr.pdf",
+        "data/output/T1D_Finnish_control_cohort.pdf",
+        "data/output/T1D_Finnish_control_cohort_VESviolin.pdf",
+        "data/output/T1D_Finnish_control_cohort_VES.pdf",
+        "data/output/T1D_Finnish_control_cohort_AgeTrajectories.pdf"
+
 
 rule VES_Heatmap:
     input:
         nrchd_gene_df="data/input/paper_supplementary_tables/supp_tables_S10.csv",
-        enrichment_df="data/input/variance_partition_results/NICA_batch2to4_new_timepoints_fsex_subject_enriched_with_labels.rds",
-        vpars="data/input/variance_partition_results/NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_vpars_object.rds",
+        enrichment_df="data/input/variance_partition_results/NICA_batch1to4_new_timepoints_fsex_subject_enriched_with_labels.rds",
+        vpars="data/input/variance_partition_results/NICA_batch1to4_new_timepoints_cleaned_normalized_fsex_vpars_object.rds",
         heritp="data/input/heritability/inheritability_data_pvals.csv",
         herithh="data/input/heritability/inheritability_data_777.csv"
     output:
@@ -43,24 +56,34 @@ rule VES_Heatmap:
         "data/output/sc-C2_cluster_top40.pdf",
         "data/output/sc-C3_cluster_top40.pdf",
         "data/output/sc-C4_cluster_top40.pdf",
+    script:
+        "scripts/VES_Heatmap.R"
+
+
+rule VES_signatures:
+    input:
+        data="data/input/pseudobulk/NICA_batch1to4_new_timepoints_cleaned_normalized.rds"
+    output:
         "data/output/signature_stability_heatmap.pdf",
+        "data/output/Background-stability_trend.pdf",
         "data/output/IAB-Bcell-stability_trend.pdf",
         "data/output/IFN-stability_trend.pdf",
         "data/output/CD8_VM_GPR56hi-stability_trend.pdf",
         "data/output/IFN-stability_trend_explicit_monocytes.pdf",
         "data/output/IFN-stability_trend_explicit_monocytes_genes.pdf"
     script:
-        "scripts/VES_Heatmap.R"
+        "scripts/VES_signatures.R"
 
 
 rule Age_trends_and_enrichments:
     input:
         cluster_gene_df="data/input/paper_supplementary_tables/supp_tables_S6.csv",
         nrchd_gene_df="data/input/paper_supplementary_tables/supp_tables_S10.csv",
-        vpars="data/input/variance_partition_results/NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_vpars_object.rds",
-        all_tts="data/input/linear_model_results/NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_spline.rds",
-        dge="data/input/pseudobulk/NICA_batch2to4_new_timepoints_cleaned_normalized.rds",
-        fgsea_simpl="data/input/linear_model_results/NICA_batch2to4_new_timepoints_limma_fgsea_simplified_age_results.rds"
+        vpars="data/input/variance_partition_results/NICA_batch1to4_new_timepoints_cleaned_normalized_fsex_vpars_object.rds",
+        all_tts="data/input/linear_model_results/NICA_batch1to4_new_timepoints_cleaned_normalized_fsex_spline.rds",
+        dge="data/input/pseudobulk/NICA_batch1to4_new_timepoints_cleaned_normalized.rds",
+        fgsea_simpl="data/input/linear_model_results/NICA_batch1to4_new_timepoints_limma_fgsea_simplified_age_results.rds",
+        fgsea_simpl_fitl="data/input/linear_model_results/simplified_age_model_limma_fit_list.rds"
     output:
         "data/output/C3_STRD_AgeTrend.pdf",
         "data/output/C5_INF_AgeTrend.pdf",
@@ -79,8 +102,7 @@ rule AdultOldCorrelations:
     input:
         nind_list="data/input/variance_partition_results/age_subject_variance_VESlist_adult_old_aging_cohort_renorm.RDS",
         ultrastab="data/input/gene_sets/age_subject_variance_ultrastab.RDS",
-        ultrastab_clust_vpars="data/input/variance_partition_results/NICA_batch2to4_new_timepoints_cleaned_normalized_fsex_vpars_object_renorm.rds",
-        age_corr_list_df_ed="data/input/variance_partition_results/age_subject_variance_young_adult_old.RDS"
+        ultrastab_clust_vpars="data/input/variance_partition_results/NICA_batch1to4_new_timepoints_cleaned_normalized_fsex_vpars_object_renorm.rds",
     output:
         "data/output/AdultOld_Age_Correlations.pdf",
         "data/output/Adult_Age_Correlations_TopGenes.pdf",
@@ -91,10 +113,48 @@ rule AdultOldCorrelations:
 
 rule individuals_and_UMAP:
     input:
-        data="data/input/seurat_object/NICAall_combined_manual_labeled_cleaned_final.rds", 
+        data="data/input/seurat_object/NICAall_combined_manual_labeled_cleaned_final_wb1.rds", 
     output:
         "data/output/UMAP.pdf",
         "data/output/individuals.pdf"
     script:
         "scripts/Individuals_and_UMAP.R"
 
+rule gex_correlation:
+    input:
+        data="data/input/pseudobulk/NICA_batch1to4_new_timepoints_cleaned_normalized.rds",
+        vpars="data/input/variance_partition_results/NICA_batch1to4_new_timepoints_cleaned_normalized_fsex_vpars_object.rds"
+    output:
+        "data/output/GEX_VES_correlations.pdf"
+    script:
+        "scripts/GEX_correlations.R"
+
+rule proteomics:
+    input:
+        RQ_data="data/input/proteomics/P-001155_Yale_Inflammation_Panel_RQ_plate1and2.csv",
+        AQ_data="data/input/proteomics/P-001155_Yale_Inflammation_Panel_AQ_plate1and2.csv",
+        meta_data="data/input/proteomics/NICA_metadata_new.csv",
+        tech_data="data/input/proteomics/P-001155_Yale_Inflammation_Panel_TechMeta_plate1and2.csv",
+        science_data="data/input/proteomics/science.adx2678_data_s3.csv",
+        science_age_data="data/input/proteomics/science.adx2678_data_s3_fixed.csv",
+        supp9_data="data/input/paper_supplementary_tables/supp_tables_s9.csv"
+    output:
+        "data/output/proteomics_cohort_overview.pdf",
+        "data/output/proteomics_variance_partition.pdf",
+        "data/output/proteomics_variance_partition_genes.pdf",
+        "data/output/proteomics_science_correlation.pdf"
+    script:
+        "scripts/nulisa_proteomics.R"
+
+rule snapshot_correlations:
+    input:
+        bulk="data/input/pseudobulk/NICAbulk_dgelist.rds",
+        vpars="data/input/paper_supplementary_tables/supp_tables_s9.csv",
+        euclids="data/input/external/E-MTAB-12793_Normalised_counts_uploaded_genesymbols.csv",
+        euclids_meta="data/input/external/E-MTAB-12793.sdrf.txt",
+        agetraj="data/input/paper_supplementary_tables/supp_tables_S6.csv"
+    output:
+        "data/output/snapshot_NICAage6_corr.pdf",
+        "data/output/snapshot_EUCLIDS_corr.pdf"
+    script:
+        "scripts/snapshot_correlations.R"
