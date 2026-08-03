@@ -40,8 +40,9 @@ rule all:
         "data/output/T1D_Finnish_control_cohort.pdf",
         "data/output/T1D_Finnish_control_cohort_VESviolin.pdf",
         "data/output/T1D_Finnish_control_cohort_VES.pdf",
-        "data/output/T1D_Finnish_control_cohort_AgeTrajectories.pdf"
-
+        "data/output/T1D_Finnish_control_cohort_AgeTrajectories.pdf",
+        "data/output/Age_and_VES_Venn.pdf",
+        "data/output/bulk_vs_sc_VES_correlation.pdf"
 
 rule VES_Heatmap:
     input:
@@ -158,3 +159,25 @@ rule snapshot_correlations:
         "data/output/snapshot_EUCLIDS_corr.pdf"
     script:
         "scripts/snapshot_correlations.R"
+
+
+rule age_interactions:
+    input:
+        gene_sets="data/input/gene_sets/combined_gene_sets.RDS",
+        age_trends="data/input/paper_supplementary_tables/supp_tables_new_s3.csv",
+        ves_genes="data/input/gene_sets/bulk_ves_genes_new.RDS"
+    output:
+        "data/output/Age_and_VES_Venn.pdf",
+    script:
+        "scripts/Age_interaction_trends.R"
+
+rule bulk_sc_correlations:
+    input:
+        bulk_ves="data/input/paper_supplementary_tables/supp_tables_s9.csv",
+        ves_genes="data/input/gene_sets/bulk_ves_genes_new.RDS",
+        vpars="data/input/variance_partition_results/NICA_batch1to4_new_timepoints_cleaned_normalized_fsex_vpars_object.rds"
+    output:
+        "data/output/bulk_vs_sc_VES_correlation.pdf",
+        "data/output/bulk_vs_sc_VES_correlation_segmented.pdf"
+    script:
+        "scripts/bulk_sc_agreement.R"
