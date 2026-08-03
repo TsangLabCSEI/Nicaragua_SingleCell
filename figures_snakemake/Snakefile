@@ -42,6 +42,8 @@ rule all:
         "data/output/T1D_Finnish_control_cohort_VES.pdf",
         "data/output/T1D_Finnish_control_cohort_AgeTrajectories.pdf",
         "data/output/Age_and_VES_Venn.pdf",
+        "data/output/Age_and_Sex_interaction.pdf",
+        "data/output/VEAge_per_window.pdf",
         "data/output/bulk_vs_sc_VES_correlation.pdf"
 
 rule VES_Heatmap:
@@ -165,9 +167,13 @@ rule age_interactions:
     input:
         gene_sets="data/input/gene_sets/combined_gene_sets.RDS",
         age_trends="data/input/paper_supplementary_tables/supp_tables_new_s3.csv",
-        ves_genes="data/input/gene_sets/bulk_ves_genes_new.RDS"
+        ves_genes="data/input/gene_sets/bulk_ves_genes_new.RDS",
+        bulk_windowed_analysis="data/input/external/bootstrap_summary_dat_list.rds",
+        bulk_vea="data/input/paper_supplementary_tables/supp_tables_s9.csv"
     output:
         "data/output/Age_and_VES_Venn.pdf",
+        "data/output/Age_and_Sex_interaction.pdf",
+        "data/output/VEAge_per_window.pdf"
     script:
         "scripts/Age_interaction_trends.R"
 
