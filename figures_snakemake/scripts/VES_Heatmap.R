@@ -211,7 +211,7 @@ var_b_subj<-var_b_subj[order(var_b_subj$value, decreasing = T),]
 var_b<-rbind(var_b_subj,var_b[var_b$variable!="Subject",])
 var_b$variable<-factor(var_b$variable,levels=c("Residuals","Age","Sex","Subject"))
 var_b$celltype<-"CD8_Naive"
-p2<-ggplot(data=var_b,aes(y=gene,x=value,group=variable,fill=variable))+geom_bar(stat='identity',colour="black",size=0.25)+scale_y_discrete(limits = rev(head(var_b,40)$gene)) + theme_classic() + labs(title="sc-C4") + scale_fill_manual(values=c("white","#619CFF","#00BA38","#F8766D")) +facet_wrap(vars(celltype))
+p2<-ggplot(data=var_b,aes(y=gene,x=value,group=variable,fill=variable))+geom_bar(stat='identity',colour="black",size=0.25)+scale_y_discrete(limits = rev(head(var_b,40)$gene)) + theme_classic() + labs(title="sc-C3") + scale_fill_manual(values=c("white","#619CFF","#00BA38","#F8766D")) +facet_wrap(vars(celltype))
 
 var_b$heritability<-0
 var_b$heritability[which(var_b$gene %in% inh_grouped$gene.symbol)]<-1
@@ -219,11 +219,11 @@ var_b$heritability[which(var_b$gene %in% inh777)]<-2
 p1 <- ggplot(var_b, aes(x = 0,  y = gene, shape=factor(heritability))) + geom_point(aes(colour=factor(heritability)))+scale_color_manual(values=c("black","white","#F8766D"))+scale_y_discrete(limits = rev(head(var_b,40)$gene)) +theme_minimal() + theme(axis.text = element_blank(), axis.title = element_blank(),panel.grid = element_blank()) + scale_shape_manual(values=c(4,26,19))
 pp1<-(p2 + theme(legend.position="none") | p1 + theme(legend.position="none")) + plot_layout(widths = c(10, 1))
 
-ultrastab_sc[["csC2-CD8_Naive"]]<-unique(var_b$gene)
+ultrastab_sc[["csC3-CD8_Naive"]]<-unique(var_b$gene)
 	
 
 #var_t (NKcell dominated cluster)
-var_t<-vpars[vpars$gene %in% row.names(p_annot_l[which(p_annot_l$clusterid==3),]),]
+var_t<-vpars[vpars$gene %in% row.names(p_annot_l[which(p_annot_l$clusterid==2),]),]
 var_t<-var_t[var_t$celltype=="CD8_EM",]
 var_t<-var_t %>% group_by(gene) %>% dplyr::slice(which.max(subject_variance_explained)) %>% as.data.frame()
 var_t<-head(var_t[order(var_t$subject_variance_explained, decreasing = T),],40)
@@ -245,7 +245,7 @@ var_t$heritability[which(var_t$gene %in% inh777)]<-2
 p1 <- ggplot(var_t, aes(x = 0,  y = gene, shape=factor(heritability))) + geom_point(aes(colour=factor(heritability)))+scale_color_manual(values=c("black","white","#F8766D"))+scale_y_discrete(limits = rev(head(var_t,40)$gene)) +theme_minimal() + theme(axis.text = element_blank(), axis.title = element_blank(),panel.grid = element_blank()) + scale_shape_manual(values=c(4,26,19))
 pp2<-(p2 + theme(legend.position="none") | p1 + theme(legend.position="none")) + plot_layout(widths = c(10, 1))
 
-ultrastab_sc[["csC4-CD8_EM"]]<-unique(var_t$gene)
+ultrastab_sc[["csC2-CD8_EM"]]<-unique(var_t$gene)
 
 
 #var_n (Tcell dominated cluster)
@@ -263,7 +263,7 @@ var_n_subj<-var_n_subj[order(var_n_subj$value, decreasing = T),]
 var_n<-rbind(var_n_subj,var_n[var_n$variable!="Subject",])
 var_n$variable<-factor(var_n$variable,levels=c("Residuals","Age","Sex","Subject"))
 var_n$celltype<-"B_Mem"
-p2<-ggplot(data=var_n,aes(y=gene,x=value,group=variable,fill=variable))+geom_bar(stat='identity',colour="black",size=0.25)+scale_y_discrete(limits = rev(head(var_n,40)$gene)) + theme_classic() + labs(title="sc-C3") + scale_fill_manual(values=c("white","#619CFF","#00BA38","#F8766D")) +facet_wrap(vars(celltype))
+p2<-ggplot(data=var_n,aes(y=gene,x=value,group=variable,fill=variable))+geom_bar(stat='identity',colour="black",size=0.25)+scale_y_discrete(limits = rev(head(var_n,40)$gene)) + theme_classic() + labs(title="sc-C4") + scale_fill_manual(values=c("white","#619CFF","#00BA38","#F8766D")) +facet_wrap(vars(celltype))
 
 var_n$heritability<-0
 var_n$heritability[which(var_n$gene %in% inh_grouped$gene.symbol)]<-1
@@ -271,7 +271,7 @@ var_n$heritability[which(var_n$gene %in% inh777)]<-2
 p1 <- ggplot(var_n, aes(x = 0,  y = gene, shape=factor(heritability))) + geom_point(aes(colour=factor(heritability)))+scale_color_manual(values=c("black","white","#F8766D"))+scale_y_discrete(limits = rev(head(var_n,40)$gene)) +theme_minimal() + theme(axis.text = element_blank(), axis.title = element_blank(),panel.grid = element_blank()) + scale_shape_manual(values=c(4,26,19))
 pp3<-(p2 + theme(legend.position="none") | p1 + theme(legend.position="none")) + plot_layout(widths = c(10, 1))
 
-ultrastab_sc[["csC3-B_Mem"]]<-unique(var_n$gene)
+ultrastab_sc[["csC4-B_Mem"]]<-unique(var_n$gene)
 
 
 #var_m (Monocyte dominated cluster)
@@ -315,7 +315,7 @@ var_m_subj<-var_m_subj[order(var_m_subj$value, decreasing = T),]
 var_m<-rbind(var_m_subj,var_m[var_m$variable!="Subject",])
 var_m$variable<-factor(var_m$variable,levels=c("Residuals","Age","Sex","Subject"))
 var_m$celltype<-"NK_CD16hi"
-p2<-ggplot(data=var_m,aes(y=gene,x=value,group=variable,fill=variable))+geom_bar(stat='identity',colour="black",size=0.25)+scale_y_discrete(limits = rev(head(var_m,40)$gene)) + theme_classic() + labs(title="sc-C1") + scale_fill_manual(values=c("white","#619CFF","#00BA38","#F8766D"))+facet_wrap(vars(celltype))
+p2<-ggplot(data=var_m,aes(y=gene,x=value,group=variable,fill=variable))+geom_bar(stat='identity',colour="black",size=0.25)+scale_y_discrete(limits = rev(head(var_m,40)$gene)) + theme_classic() + labs(title="sc-C2") + scale_fill_manual(values=c("white","#619CFF","#00BA38","#F8766D"))+facet_wrap(vars(celltype))
 
 var_m$heritability<-0
 var_m$heritability[which(var_m$gene %in% inh_grouped$gene.symbol)]<-1
