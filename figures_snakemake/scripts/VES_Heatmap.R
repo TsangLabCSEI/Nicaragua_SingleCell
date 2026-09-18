@@ -16,9 +16,11 @@ library(scales)
 
 # load data
 nrchd_gene_df<-read.csv(snakemake@input[["nrchd_gene_df"]])
-enrichment_df<-readRDS(snakemake@input[["enrichment_df"]]) 
-enrichment_df<-enrichment_df[str_detect(enrichment_df$pathway,"btm"),]
-vpars<-readRDS(snakemake@input[["vpars"]]) 
+enrichment_df_all<-readRDS(snakemake@input[["enrichment_df"]]) 
+enrichment_df<-enrichment_df_all[str_detect(enrichment_df_all$pathway,"btm"),]
+vpars<-readRDS(snakemake@input[["vpars"]])
+vpars_sort_coarse=readRDS(snakemake@input[["vpars_sort"]])
+vpars<-rbind(vpars,vpars_sort_coarse)
 inh<-read.csv(snakemake@input[["heritp"]]) # hertability data of gene expression (Wright et al 2014, Nat Genet.)
 inh777<-read.csv(snakemake@input[["herithh"]]) 
 inh777<-inh777$X
@@ -39,7 +41,7 @@ for (i in seq(1,nrow(nrchd_gene_df))){
 # reformat subject variance data
 ledge<-unique(unlist(enrichment_df$leadingEdge))
 vpars_h<-vpars[c("subject_variance_explained","celltype","gene")]
-vpars_h<-vpars_h[which(!(vpars_h$celltype %in% c("ILC","doublets","T_Platelet_bind","T_DN"))),]
+vpars_h<-vpars_h[which(!(vpars_h$celltype %in% c("ILC","doublets","T_Platelet_bind","T_DN","NKT_like"))),]
 vpars_h<-reshape(vpars_h, idvar = "gene", timevar = "celltype", direction = "wide")
 vpars_h[is.na(vpars_h)]<-0
 genes<-vpars_h$gene
@@ -140,6 +142,9 @@ col_fun19 = colorRamp2(c(-0.5, 0, 1), c("black", "#EBEBEB", "darksalmon"))
 
 col_list<-list("HERITABILITY (continuous h2 value)"=col_fun,"HERITABILITY (Wright et al.,Nature Genetics 2014)"=col_fun1,"M146_MHC-TLR7-TLR8 cluster"=col_fun2,"M47_M47.2_M69_enriched in B cells (I/III/VI)"=col_fun3,"S2_B cell surface signature"=col_fun4,"M5.0_regulation of antigen presentation and immune response"=col_fun5,"M37.0_immune activation - generic cluster"=col_fun6,"M7.2_M61_enriched in NK cells (I/II)"=col_fun7,"M37.1_enriched in neutrophils (I)"=col_fun8,"M7.0_enriched in T cells (I)"=col_fun9,"M7.1_T cell activation (I)"=col_fun10,"M16_TLR and inflammatory signaling"=col_fun11,"M32.1_platelet activation (II)"=col_fun12,"M5.1_T cell activation and signaling"=col_fun13,"M11_M81_M118_enriched in monocytes (II/IV)"=col_fun14,"S4_Monocyte surface signature"=col_fun15,"M4.3_myeloid cell enriched receptors and transporters"=col_fun16,"M2.0_M2.1_extracellular matrix (I/II)"=col_fun17,"M4.0_cell cycle and transcription"=col_fun18,"M49_transcription regulation in cell development"=col_fun19)
 
+n_sorted<-length(unique(vpars_sort_coarse$celltype))
+split<-factor(c(rep("Unsorted",dim(vpars_h)[2]-n_sorted),rep("Sorted",n_sorted)),levels=c("Unsorted","Sorted"))
+
 vpars_h_c1<-vpars_h[p_annot_l$clusterid==1,]
 p_annot_l_c1<-p_annot_l[p_annot_l$clusterid==1,]
 vpars_h_c1<-vpars_h_c1[order(p_annot_l_c1$"HERITABILITY (continuous h2 value)", decreasing = T),]
@@ -147,7 +152,7 @@ p_annot_l_c1<-p_annot_l_c1[order(p_annot_l_c1$"HERITABILITY (continuous h2 value
 p_annot_l_c1$clusterid<-NULL
 mat = t(vpars_h_c1)
 column_ha = HeatmapAnnotation(df = p_annot_l_c1, col = col_list, na_col = "black", show_legend = F, show_annotation_name=F)
-h1<-Heatmap(mat, name = "scVES", top_annotation = column_ha, col = magma(100), cluster_columns=F, cluster_rows=F,show_column_names=F, column_title = "C1")
+h1<-Heatmap(mat, name = "scVES", top_annotation = column_ha, col = magma(100), cluster_columns=F, cluster_rows=F,show_column_names=F,row_split = split, column_title = "C1")
 
 vpars_h_c1<-vpars_h[p_annot_l$clusterid==2,]
 p_annot_l_c1<-p_annot_l[p_annot_l$clusterid==2,]
@@ -156,7 +161,7 @@ p_annot_l_c1<-p_annot_l_c1[order(p_annot_l_c1$"HERITABILITY (continuous h2 value
 p_annot_l_c1$clusterid<-NULL
 mat = t(vpars_h_c1)
 column_ha = HeatmapAnnotation(df = p_annot_l_c1, col = col_list, na_col = "black", show_legend = F, show_annotation_name=F)
-h2<-Heatmap(mat, name = "scVES", top_annotation = column_ha, col = magma(100), cluster_columns=F, cluster_rows=F,show_column_names=F, column_title = "C2")
+h2<-Heatmap(mat, name = "scVES", top_annotation = column_ha, col = magma(100), cluster_columns=F, cluster_rows=F,show_column_names=F,row_split = split, column_title = "C2")
 
 vpars_h_c1<-vpars_h[p_annot_l$clusterid==3,]
 p_annot_l_c1<-p_annot_l[p_annot_l$clusterid==3,]
@@ -165,7 +170,7 @@ p_annot_l_c1<-p_annot_l_c1[order(p_annot_l_c1$"HERITABILITY (continuous h2 value
 p_annot_l_c1$clusterid<-NULL
 mat = t(vpars_h_c1)
 column_ha = HeatmapAnnotation(df = p_annot_l_c1, col = col_list, na_col = "black", show_legend = F, show_annotation_name=F)
-h3<-Heatmap(mat, name = "scVES", top_annotation = column_ha, col = magma(100), cluster_columns=F, cluster_rows=F,show_column_names=F, column_title = "C3")
+h3<-Heatmap(mat, name = "scVES", top_annotation = column_ha, col = magma(100), cluster_columns=F, cluster_rows=F,show_column_names=F,row_split = split, column_title = "C3")
 
 vpars_h_c1<-vpars_h[p_annot_l$clusterid==4,]
 p_annot_l_c1<-p_annot_l[p_annot_l$clusterid==4,]
@@ -174,19 +179,25 @@ p_annot_l_c1<-p_annot_l_c1[order(p_annot_l_c1$"HERITABILITY (continuous h2 value
 p_annot_l_c1$clusterid<-NULL
 mat = t(vpars_h_c1)
 column_ha = HeatmapAnnotation(df = p_annot_l_c1, col = col_list, na_col = "black", show_legend = F)
-h4<-Heatmap(mat, name = "scVES", top_annotation = column_ha, col = magma(100), cluster_columns=F, cluster_rows=F,show_column_names=F, column_title = "C4")
+h4<-Heatmap(mat, name = "scVES", top_annotation = column_ha, col = magma(100), cluster_columns=F, cluster_rows=F,show_column_names=F,row_split = split, column_title = "C4")
 
 pdf("data/output/VES_Heatmap.pdf",width=12,height=9)
 h1+h2+h3+h4
 dev.off()
 
+ultrastab_sc<-list()
+ultrastab_sc[["csC1"]]<-rownames(p_annot_l)[p_annot_l$clusterid==1]
+ultrastab_sc[["csC2"]]<-rownames(p_annot_l)[p_annot_l$clusterid==2]
+ultrastab_sc[["csC3"]]<-rownames(p_annot_l)[p_annot_l$clusterid==3]
+ultrastab_sc[["csC4"]]<-rownames(p_annot_l)[p_annot_l$clusterid==4]
 
 #visualize variance partitioning for top40 genes per main cluster
 p_annot_l$clusterid<-cutree(p$tree_col, k = 4)[rownames(vpars_h)]
 vpars<-vpars[c("batch_variance_explained","subject_variance_explained","sex_variance_explained","residual_variance_explained","age_variance_explained","celltype","gene")]
+vpars_sort_coarse<-vpars_sort_coarse[c("batch_variance_explained","subject_variance_explained","sex_variance_explained","residual_variance_explained","age_variance_explained","celltype","gene")]
 
 #var_b (Bcell dominated cluster)
-var_b<-vpars[vpars$gene %in% row.names(p_annot_l[which(p_annot_l$clusterid==2),]),]
+var_b<-vpars[vpars$gene %in% row.names(p_annot_l[which(p_annot_l$clusterid==3),]),]
 var_b<-var_b[var_b$celltype=="CD8_Naive",]
 var_b<-var_b %>% group_by(gene) %>% dplyr::slice(which.max(subject_variance_explained)) %>% as.data.frame()
 var_b<-head(var_b[order(var_b$subject_variance_explained, decreasing = T),],40)
@@ -208,10 +219,12 @@ var_b$heritability[which(var_b$gene %in% inh777)]<-2
 p1 <- ggplot(var_b, aes(x = 0,  y = gene, shape=factor(heritability))) + geom_point(aes(colour=factor(heritability)))+scale_color_manual(values=c("black","white","#F8766D"))+scale_y_discrete(limits = rev(head(var_b,40)$gene)) +theme_minimal() + theme(axis.text = element_blank(), axis.title = element_blank(),panel.grid = element_blank()) + scale_shape_manual(values=c(4,26,19))
 pp1<-(p2 + theme(legend.position="none") | p1 + theme(legend.position="none")) + plot_layout(widths = c(10, 1))
 
+ultrastab_sc[["csC2-CD8_Naive"]]<-unique(var_b$gene)
+	
 
 #var_t (NKcell dominated cluster)
-var_t<-vpars[vpars$gene %in% row.names(p_annot_l[which(p_annot_l$clusterid==4),]),]
-var_t<-var_t[var_t$celltype=="NK_CD16hi",]
+var_t<-vpars[vpars$gene %in% row.names(p_annot_l[which(p_annot_l$clusterid==3),]),]
+var_t<-var_t[var_t$celltype=="CD8_EM",]
 var_t<-var_t %>% group_by(gene) %>% dplyr::slice(which.max(subject_variance_explained)) %>% as.data.frame()
 var_t<-head(var_t[order(var_t$subject_variance_explained, decreasing = T),],40)
 colnames(var_t)<-c("batch","Subject","Sex","Residuals","Age","celltype","gene")
@@ -223,7 +236,7 @@ var_t_subj<-var_t[var_t$variable=="Subject",]
 var_t_subj<-var_t_subj[order(var_t_subj$value, decreasing = T),]
 var_t<-rbind(var_t_subj,var_t[var_t$variable!="Subject",])
 var_t$variable<-factor(var_t$variable,levels=c("Residuals","Age","Sex","Subject"))
-var_t$celltype<-"NK_CD16hi"
+var_t$celltype<-"CD8_EM"
 p2<-ggplot(data=var_t,aes(y=gene,x=value,group=variable,fill=variable))+geom_bar(stat='identity',colour="black",size=0.25)+scale_y_discrete(limits = rev(head(var_t,40)$gene)) + theme_classic() + labs(title="sc-C2") + scale_fill_manual(values=c("white","#619CFF","#00BA38","#F8766D")) +facet_wrap(vars(celltype))
 
 var_t$heritability<-0
@@ -232,9 +245,11 @@ var_t$heritability[which(var_t$gene %in% inh777)]<-2
 p1 <- ggplot(var_t, aes(x = 0,  y = gene, shape=factor(heritability))) + geom_point(aes(colour=factor(heritability)))+scale_color_manual(values=c("black","white","#F8766D"))+scale_y_discrete(limits = rev(head(var_t,40)$gene)) +theme_minimal() + theme(axis.text = element_blank(), axis.title = element_blank(),panel.grid = element_blank()) + scale_shape_manual(values=c(4,26,19))
 pp2<-(p2 + theme(legend.position="none") | p1 + theme(legend.position="none")) + plot_layout(widths = c(10, 1))
 
+ultrastab_sc[["csC4-CD8_EM"]]<-unique(var_t$gene)
+
 
 #var_n (Tcell dominated cluster)
-var_n<-vpars[vpars$gene %in% row.names(p_annot_l[which(p_annot_l$clusterid==3),]),]
+var_n<-vpars[vpars$gene %in% row.names(p_annot_l[which(p_annot_l$clusterid==4),]),]
 var_n<-var_n[var_n$celltype=="B_Mem",]
 var_n<-var_n %>% group_by(gene) %>% dplyr::slice(which.max(subject_variance_explained)) %>% as.data.frame()
 var_n<-head(var_n[order(var_n$subject_variance_explained, decreasing = T),],40)
@@ -255,6 +270,8 @@ var_n$heritability[which(var_n$gene %in% inh_grouped$gene.symbol)]<-1
 var_n$heritability[which(var_n$gene %in% inh777)]<-2
 p1 <- ggplot(var_n, aes(x = 0,  y = gene, shape=factor(heritability))) + geom_point(aes(colour=factor(heritability)))+scale_color_manual(values=c("black","white","#F8766D"))+scale_y_discrete(limits = rev(head(var_n,40)$gene)) +theme_minimal() + theme(axis.text = element_blank(), axis.title = element_blank(),panel.grid = element_blank()) + scale_shape_manual(values=c(4,26,19))
 pp3<-(p2 + theme(legend.position="none") | p1 + theme(legend.position="none")) + plot_layout(widths = c(10, 1))
+
+ultrastab_sc[["csC3-B_Mem"]]<-unique(var_n$gene)
 
 
 #var_m (Monocyte dominated cluster)
@@ -277,8 +294,63 @@ p2<-ggplot(data=var_m,aes(y=gene,x=value,group=variable,fill=variable))+geom_bar
 var_m$heritability<-0
 var_m$heritability[which(var_m$gene %in% inh_grouped$gene.symbol)]<-1
 var_m$heritability[which(var_m$gene %in% inh777)]<-2
-p1 <- ggplot(var_m, aes(x = 0,  y = gene, shape=factor(heritability))) + geom_point(aes(colour=factor(heritability)))+scale_color_manual(values=c("white","#F8766D"))+scale_y_discrete(limits = rev(head(var_m,40)$gene)) +theme_minimal() + theme(axis.text = element_blank(), axis.title = element_blank(),panel.grid = element_blank()) + scale_shape_manual(values=c(26,19))
+p1 <- ggplot(var_m, aes(x = 0,  y = gene, shape=factor(heritability))) + geom_point(aes(colour=factor(heritability)))+scale_color_manual(values=c("black","white","#F8766D"))+scale_y_discrete(limits = rev(head(var_m,40)$gene)) +theme_minimal() + theme(axis.text = element_blank(), axis.title = element_blank(),panel.grid = element_blank()) + scale_shape_manual(values=c(4,26,19))
 pp4<-(p2 + theme(legend.position="none") | p1 + theme(legend.position="none")) + plot_layout(widths = c(10, 1))
+
+ultrastab_sc[["csC1-Mono"]]<-unique(var_m$gene)
+
+
+#var_m (NK dominated cluster)
+var_m<-vpars[vpars$gene %in% row.names(p_annot_l[which(p_annot_l$clusterid==2),]),]
+var_m<-var_m[var_m$celltype=="NK_CD16hi",]
+var_m<-var_m %>% group_by(gene) %>% dplyr::slice(which.max(subject_variance_explained)) %>% as.data.frame()
+var_m<-head(var_m[order(var_m$subject_variance_explained, decreasing = T),],40)
+colnames(var_m)<-c("batch","Subject","Sex","Residuals","Age","celltype","gene")
+var_m<-reshape2::melt(var_m[c("Subject","Sex","Residuals","Age","gene")])
+scale_df<-as.data.frame(var_m %>% group_by(gene) %>% summarize(scalefactor=1/sum(value)))
+var_m<-merge(var_m,scale_df,)
+var_m$value<-var_m$value*var_m$scalefactor
+var_m_subj<-var_m[var_m$variable=="Subject",]
+var_m_subj<-var_m_subj[order(var_m_subj$value, decreasing = T),]
+var_m<-rbind(var_m_subj,var_m[var_m$variable!="Subject",])
+var_m$variable<-factor(var_m$variable,levels=c("Residuals","Age","Sex","Subject"))
+var_m$celltype<-"NK_CD16hi"
+p2<-ggplot(data=var_m,aes(y=gene,x=value,group=variable,fill=variable))+geom_bar(stat='identity',colour="black",size=0.25)+scale_y_discrete(limits = rev(head(var_m,40)$gene)) + theme_classic() + labs(title="sc-C1") + scale_fill_manual(values=c("white","#619CFF","#00BA38","#F8766D"))+facet_wrap(vars(celltype))
+
+var_m$heritability<-0
+var_m$heritability[which(var_m$gene %in% inh_grouped$gene.symbol)]<-1
+var_m$heritability[which(var_m$gene %in% inh777)]<-2
+p1 <- ggplot(var_m, aes(x = 0,  y = gene, shape=factor(heritability))) + geom_point(aes(colour=factor(heritability)))+scale_color_manual(values=c("black","white","#F8766D"))+scale_y_discrete(limits = rev(head(var_m,40)$gene)) +theme_minimal() + theme(axis.text = element_blank(), axis.title = element_blank(),panel.grid = element_blank()) + scale_shape_manual(values=c(4,26,19))
+pp5<-(p2 + theme(legend.position="none") | p1 + theme(legend.position="none")) + plot_layout(widths = c(10, 1))
+
+ultrastab_sc[["csC2-NK"]]<-unique(var_m$gene)
+
+
+var_m<-vpars_sort_coarse[vpars_sort_coarse$celltype=="sorted-HSPC",]
+var_m<-var_m[var_m$gene %in% unique(unlist(enrichment_df_all$leadingEdge)),]
+var_m<-var_m %>% group_by(gene) %>% dplyr::slice(which.max(subject_variance_explained)) %>% as.data.frame()
+var_m<-head(var_m[order(var_m$subject_variance_explained, decreasing = T),],40)
+colnames(var_m)<-c("batch","Subject","Sex","Residuals","Age","celltype","gene")
+var_m<-reshape2::melt(var_m[c("Subject","Sex","Residuals","Age","gene")])
+scale_df<-as.data.frame(var_m %>% group_by(gene) %>% summarize(scalefactor=1/sum(value)))
+var_m<-merge(var_m,scale_df,)
+var_m$value<-var_m$value*var_m$scalefactor
+var_m_subj<-var_m[var_m$variable=="Subject",]
+var_m_subj<-var_m_subj[order(var_m_subj$value, decreasing = T),]
+var_m<-rbind(var_m_subj,var_m[var_m$variable!="Subject",])
+var_m$variable<-factor(var_m$variable,levels=c("Residuals","Age","Sex","Subject"))
+var_m$celltype<-"sorted-HSPC"
+p2<-ggplot(data=var_m,aes(y=gene,x=value,group=variable,fill=variable))+geom_bar(stat='identity',colour="black",size=0.25)+scale_y_discrete(limits = rev(head(var_m,40)$gene)) + theme_classic() + labs(title="all") + scale_fill_manual(values=c("white","#619CFF","#00BA38","#F8766D"))+facet_wrap(vars(celltype))
+
+var_m$heritability<-0
+var_m$heritability[which(var_m$gene %in% inh_grouped$gene.symbol)]<-1
+var_m$heritability[which(var_m$gene %in% inh777)]<-2
+p1 <- ggplot(var_m, aes(x = 0,  y = gene, shape=factor(heritability))) + geom_point(aes(colour=factor(heritability)))+scale_color_manual(values=c("black","white","#F8766D"))+scale_y_discrete(limits = rev(head(var_m,40)$gene)) +theme_minimal() + theme(axis.text = element_blank(), axis.title = element_blank(),panel.grid = element_blank()) + scale_shape_manual(values=c(4,26,19))
+pp6<-(p2 + theme(legend.position="none") | p1 + theme(legend.position="none")) + plot_layout(widths = c(10, 1))
+
+
+ultrastab_sc[["all-HSPC"]]<-unique(var_m$gene)
+saveRDS(ultrastab_sc,"data/output/age_subject_variance_ultrastab_sc.RDS")
 
 
 pdf("data/output/sc-C4_cluster_top40.pdf")
@@ -293,4 +365,9 @@ dev.off()
 pdf("data/output/sc-C1_cluster_top40.pdf")
 pp4
 dev.off()
-
+pdf("data/output/sc-C2NK_cluster_top40.pdf")
+pp5
+dev.off()
+pdf("data/output/all-HSPC_cluster_top40.pdf")
+pp6
+dev.off()

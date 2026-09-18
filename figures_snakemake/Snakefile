@@ -51,6 +51,7 @@ rule VES_Heatmap:
         nrchd_gene_df="data/input/paper_supplementary_tables/supp_tables_S10.csv",
         enrichment_df="data/input/variance_partition_results/NICA_batch1to4_new_timepoints_fsex_subject_enriched_with_labels.rds",
         vpars="data/input/variance_partition_results/NICA_batch1to4_new_timepoints_cleaned_normalized_fsex_vpars_object.rds",
+        vpars_sort="data/input/variance_partition_results/NICA_sorted_coarse_pbulk_fsex_vpars_object.rds",
         heritp="data/input/heritability/inheritability_data_pvals.csv",
         herithh="data/input/heritability/inheritability_data_777.csv"
     output:
@@ -59,6 +60,8 @@ rule VES_Heatmap:
         "data/output/sc-C2_cluster_top40.pdf",
         "data/output/sc-C3_cluster_top40.pdf",
         "data/output/sc-C4_cluster_top40.pdf",
+        "data/output/sc-C2NK_cluster_top40.pdf",
+        "data/output/all-HSPC_cluster_top40.pdf"
     script:
         "scripts/VES_Heatmap.R"
 
